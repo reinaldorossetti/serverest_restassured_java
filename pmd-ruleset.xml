@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Custom PMD Ruleset for ServeRest"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>Regras customizadas do PMD ignorando a exigência de mensagem em asserções do JUnit.</description>
+
+    <!-- Inclui todas as regras de Best Practices -->
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="UnitTestAssertionsShouldIncludeMessage" />
+        <exclude name="UnitTestShouldIncludeAssert" />
+        <exclude name="JUnit5TestShouldBePackagePrivate" />
+        <exclude name="UnitTestContainsTooManyAsserts" />
+        <exclude name="LooseCoupling" />
+        <exclude name="AbstractClassWithoutAbstractMethod" />
+    </rule>
+
+    <!-- Inclui as regras de Code Style -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="LongVariable" />
+        <exclude name="ShortVariable" />
+        <exclude name="AtLeastOneConstructor" />
+        <exclude name="LinguisticNaming" />
+        <exclude name="TooManyStaticImports" />
+    </rule>
+
+    <!-- Inclui as regras de Design -->
+    <rule ref="category/java/design.xml">
+        <exclude name="UseUtilityClass" />
+        <exclude name="TooManyMethods" />
+    </rule>
+
+    <!-- Inclui as regras de Error Prone -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidDuplicateLiterals" />
+    </rule>
+
+</ruleset>
