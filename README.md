@@ -1,21 +1,18 @@
-# serverest_restassured_java
-Projeto de Automação de Testes usando o RestAssured e Java 23 com ALLURE e GITHUB ACTIONS.
-
 # 🧪 Rest Assured API Testing - ServeRest
 
-[![RestAssured](https://img.shields.io/badge/RestAssured-5.3.2-blue.svg)](https://rest-assured.io/)
+[![RestAssured](https://img.shields.io/badge/RestAssured-6.0.0-blue.svg)](https://rest-assured.io/)
 [![JUnit5](https://img.shields.io/badge/JUnit-5.10.1-green.svg)](https://junit.org/junit5/)
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
+[![Java](https://img.shields.io/badge/Java-23-orange.svg)](https://www.oracle.com/java/)
+[![PMD](https://img.shields.io/badge/PMD-7.7.0-brightgreen.svg)](https://pmd.github.io/)
 
-Projeto de automação de testes de API utilizando **Rest Assured** para testar a API REST **ServeRest** - uma API gratuita que simula uma loja virtual.
+Projeto de automação de testes de API utilizando **Rest Assured** e **Java 23** para validar a API REST **ServeRest** — uma plataforma que simula os serviços de um e-commerce.
 
-Projeto estruturado com boas práticas, exemplos de testes, validações avançadas e integração com JUnit 5 para execução e relatórios.
+Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), relatórios interativos com **Allure Report**, análise estática via **PMD 7** e esteira de CI/CD via **GitHub Actions**.
 
-URI do repositório: [https://github.com/reinaldorossetti/karate_api_java](https://github.com/reinaldorossetti/karate_api_java)
-
-Reporte na esteira: [https://reinaldorossetti.github.io/karate_api_java/allure-reports/index.html](https://reinaldorossetti.github.io/karate_api_java/allure-reports/index.html)
-
-Testes realizados na API: [TESTING_API.MD](TESTING_API.MD)
+- **Repositório**: [https://github.com/reinaldorossetti/serverest_restassured_java](https://github.com/reinaldorossetti/serverest_restassured_java)
+- **Relatório no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-reports/index.html](https://reinaldorossetti.github.io/serverest_restassured_java/allure-reports/index.html)
+- **Mapeamento de Testes**: [TESTING_API.MD](TESTING_API.MD)
+- **Requisitos do Projeto**: [Requisitos.md](Requisitos.md)
 
 ---
 
@@ -25,39 +22,29 @@ Testes realizados na API: [TESTING_API.MD](TESTING_API.MD)
 - [Sobre a API ServeRest](#-sobre-a-api-serverest)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Pré-requisitos](#-pré-requisitos)
-- [Instalação](#-instalação)
-- [Executando os Testes](#-executando-os-testes)
-- [Análise Estática de Código (PMD & Checkstyle)](#-análise-estática-de-código-pmd--checkstyle)
+- [Dependências do Projeto (pom.xml)](#-dependências-do-projeto-pomxml)
+- [Instalação e Execução](#-instalação-e-execução)
+- [Análise Estática de Código (PMD)](#-análise-estática-de-código-pmd)
+- [Esteira CI/CD - GitHub Actions](#-esteira-cicd---github-actions)
 - [Exemplos de Testes](#-exemplos-de-testes)
-- [Funcionalidades do Rest Assured](#-funcionalidades-do-rest-assured)
-- [Relatórios](#-relatórios)
+- [Relatórios Allure](#-relatórios-allure)
 - [Boas Práticas](#-boas-práticas)
-- [Recursos Adicionais](#-recursos-adicionais)
 
 ---
 
 ## 🧪 Sobre o Rest Assured
 
-**Rest Assured** é uma biblioteca Java open-source amplamente utilizada para testes de APIs REST. Oferece uma DSL fluente e expressiva para escrever testes robustos com validações poderosas.
+**Rest Assured** é uma biblioteca Java open-source amplamente utilizada para automação de testes de APIs REST. Ela oferece uma DSL (Domain Specific Language) fluente baseada no padrão BDD `given().when().then()`.
 
 ### ✨ Principais Características
 
 - **🔥 DSL Fluente**: Sintaxe `given().when().then()` intuitiva e legível
-- **🚀 Suporte completo a REST**: GET, POST, PUT, PATCH, DELETE com JSON/XML
-- **🎯 Assertions com Hamcrest**: Validações poderosas e expressivas nativas
-- **🔄 Reutilização com RequestSpec**: Especificações reutilizáveis de requisição e resposta
-- **📊 Integração com Allure**: Relatórios detalhados e visuais com `givenWithAllure()`
-- **🧪 Data-Driven Testing**: Suporte nativo via `@CsvFileSource`, `@MethodSource`
-- **⚡ Execução Paralela**: Suporte via `@Execution(CONCURRENT)` do JUnit 5
-- **🔐 Autenticação**: Suporte para OAuth2, JWT, Basic Auth e headers customizados
-
-### 💡 Por que usar Rest Assured?
-
-1. **Produtividade**: DSL fluente reduz verbosidade em comparação ao HttpClient puro
-2. **Manutenibilidade**: Testes legíveis e fáceis de manter
-3. **Integração**: Funciona nativamente com JUnit 5, TestNG e Maven
-4. **Comunidade ativa**: Amplamente adotado no mercado e bem documentado
-5. **CI/CD**: Fácil integração com Jenkins, GitLab CI, GitHub Actions
+- **🚀 Suporte completo a REST**: GET, POST, PUT, DELETE com payloads JSON
+- **🎯 Assertions com Hamcrest**: Validações estruturais e de schema
+- **📊 Integração com Allure**: Logs automáticos de requisições e respostas com `AllureRestAssured`
+- **🧪 Data-Driven Testing**: Suporte a testes parametrizados via `@CsvFileSource`
+- **⚡ Execução Paralela**: Suporte habilitado via JUnit 5 Platform
+- **🔐 Autenticação**: Validação e transmissão de tokens JWT em cabeçalhos HTTP
 
 ---
 
@@ -65,624 +52,226 @@ Testes realizados na API: [TESTING_API.MD](TESTING_API.MD)
 
 [ServeRest](https://serverest.dev/) é uma API REST gratuita que simula uma loja virtual para fins educacionais e prática de testes de API.
 
-### 🛍️ Endpoints Disponíveis
+### 🛍️ Endpoints Cobertos
 
 | Recurso | Endpoints | Descrição |
 |---------|-----------|-----------|
-| **Login** | `POST /login` | Autenticação de usuários |
-| **Usuários** | `GET, POST, PUT, DELETE /usuarios` | Gerenciamento de usuários |
-| **Produtos** | `GET, POST, PUT, DELETE /produtos` | Gerenciamento de produtos (requer admin) |
-| **Carrinhos** | `GET, POST, DELETE /carrinhos` | Gerenciamento de carrinhos de compras |
+| **Login** | `POST /login` | Autenticação e geração de token JWT |
+| **Usuários** | `GET, POST, PUT, DELETE /usuarios` | Gerenciamento de cadastro de usuários |
+| **Produtos** | `GET, POST, PUT, DELETE /produtos` | Gerenciamento do catálogo de produtos (requer admin) |
+| **Carrinhos** | `GET, POST, DELETE /carrinhos` | Gerenciamento e finalização de compras |
 
 ### 🔗 Base URL
-
 ```
 https://serverest.dev
 ```
-
-### 📖 Documentação Completa
-
-- **Swagger UI**: https://serverest.dev/
-- **Repositório**: https://github.com/ServeRest/ServeRest
-- **Front-end (Beta)**: https://front.serverest.dev/
 
 ---
 
 ## 📁 Estrutura do Projeto
 
 ```
-karate_api_java/
+serverest_restassured_java/
 │
 ├── src/
-│   ├── main/
-│   │   └── java/                         # (vazio neste projeto)
-│   │
 │   └── test/
 │       ├── java/
-│       │   └── restassured/
-│       │       ├── base/
-│       │       │   └── BaseApiTest.java        # Configuração base (RequestSpec, BaseURI)
+│       │   └── restassured_serverest/
+│       │       ├── BaseApiTest.java               # Configurações base (BaseURI, RequestSpecs, Filtro Allure)
+│       │       ├── ExecutionBuilderRunner.java    # Suíte runner de execução dos testes JUnit
+│       │       ├── carrinhos/
+│       │       │   └── CartsRestAssuredTest.java  # Suíte de testes do recurso Carrinhos
 │       │       ├── login/
-│       │       │   └── LoginRestAssuredTest.java
-│       │       ├── usuarios/
-│       │       │   └── UsuariosRestAssuredTest.java
+│       │       │   └── LoginRestAssuredTest.java  # Suíte de testes do recurso Login
 │       │       ├── produtos/
-│       │       │   └── ProdutosRestAssuredTest.java
+│       │       │   └── ProductsRestAssuredTest.java # Suíte de testes do recurso Produtos
+│       │       ├── usuarios/
+│       │       │   └── UsersRestAssuredTest.java  # Suíte de testes do recurso Usuários
 │       │       └── utils/
-│       │           └── FakerUtils.java
+│       │           └── FakerUtils.java            # Utilitário para geração de dados dinâmicos
 │       │
 │       └── resources/
-│           ├── restassured/
-│           │   └── login/
-│           │       └── invalid-login-emails.csv
-│           └── junit-platform.properties
+│           ├── logback-test.xml                   # Configuração de logs do projeto
+│           └── restassured/
+│               └── login/
+│                   └── invalido-login.csv         # Massa de dados para teste parametrizado
 │
-├── pom.xml                               # Dependências Maven
-└── README.md                             # Este arquivo
+├── pmd-ruleset.xml                               # Regras customizadas da análise estática PMD 7
+├── pom.xml                                       # Gerenciamento de dependências e plugins Maven
+├── Requisitos.md                                 # Especificações dos requisitos do projeto
+├── TESTING_API.MD                                # Mapeamento completo dos cenários de teste
+└── README.md                                     # Documentação principal
 ```
 
 ---
 
 ## 🔧 Pré-requisitos
 
-- **Java JDK 21** (LTS) ou superior
-- **Maven 3.6+**
-- **IDE** (IntelliJ IDEA, Eclipse, VS Code)
-- Conexão com internet (para acessar a API ServeRest)
+- **Java JDK 23**
+- **Maven 3.8+** (ou o Maven Wrapper `./mvnw` incluso)
+- **IDE** (VS Code, IntelliJ IDEA ou Eclipse)
 
-### Download do Java 21
+---
 
-- Oracle JDK 21: https://www.oracle.com/java/technologies/downloads/#java21
+## 📦 Dependências do Projeto (`pom.xml`)
 
-### Verificar instalação
+| Componente | Grupo / Artefato | Versão |
+|------------|------------------|--------|
+| **Java** | `compiler.source / target` | `23` |
+| **Rest Assured** | `io.rest-assured:rest-assured` | `6.0.0` |
+| **JUnit 5** | `org.junit.jupiter:junit-jupiter-api` | `5.10.1` |
+| **JUnit Platform** | `org.junit.platform:junit-platform-suite-api` | `1.10.1` |
+| **Allure Rest Assured** | `io.qameta.allure:allure-rest-assured` | `2.17.0` |
+| **Allure JUnit 5** | `io.qameta.allure:allure-junit5` | `2.17.0` |
+| **Java Faker** | `com.github.javafaker:javafaker` | `1.0.2` |
+| **Maven PMD Plugin** | `org.apache.maven.plugins:maven-pmd-plugin` | `3.26.0` (PMD 7.7.0) |
 
+---
+
+## 🚀 Instalação e Execução
+
+### 1. Clonar o repositório
 ```bash
-java -version
-mvn -version
+git clone https://github.com/reinaldorossetti/serverest_restassured_java.git
+cd serverest_restassured_java
+```
+
+### 2. Executar todos os testes
+```bash
+mvn clean test
+```
+
+### 3. Executar uma suíte específica
+```bash
+mvn test -Dtest=UsersRestAssuredTest
+```
+
+### 4. Executar via Runner de Testes
+```bash
+mvn test -Dtest=ExecutionBuilderRunner
 ```
 
 ---
 
-## 📦 Versões das dependências (pom.xml)
+## 🔍 Análise Estática de Código (PMD)
 
-| Componente                         | Artefato                                           | Versão  |
-|------------------------------------|----------------------------------------------------|---------|
-| Rest Assured                       | io.rest-assured:rest-assured                       | 5.3.2   |
-| Rest Assured JSON Path             | io.rest-assured:json-path                          | 5.3.2   |
-| Allure Rest Assured                | io.qameta.allure:allure-rest-assured               | 2.24.0  |
-| JUnit 5 (Jupiter API)             | org.junit.jupiter:junit-jupiter-api                | 5.10.1  |
-| JUnit 5 (Jupiter Engine)          | org.junit.jupiter:junit-jupiter-engine             | 5.10.1  |
-| JUnit 5 (Jupiter Params)          | org.junit.jupiter:junit-jupiter-params             | 5.10.1  |
-| Hamcrest                           | org.hamcrest:hamcrest                              | 2.2     |
-| Java Faker                         | com.github.javafaker:javafaker                     | 1.0.2   |
-| Maven Surefire Plugin             | org.apache.maven.plugins:maven-surefire-plugin     | 3.2.5   |
-| Maven Compiler Plugin             | org.apache.maven.plugins:maven-compiler-plugin     | 3.11.0  |
+O projeto conta com validação automatizada de qualidade de código utilizando o **PMD 7.7.0**.
 
----
-
-## 🚀 Instalação
-
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/reinaldorossetti/karate_api_java.git
-cd karate_api_java
-```
-
-### 2. Instale as dependências
-
-```bash
-mvn clean install
-```
-
-### 3. Verifique a instalação
-
-```bash
-mvn test
-```
-
----
-
-## ▶️ Executando os Testes
-
-### Executar todos os testes do projeto restassured.
-
-```bash
-mvn clean test -Dtest=restassured.**.*Test
-```
-
-### Executar suíte de login
-
-```bash
-mvn -Dtest=LoginRestAssuredTest test
-```
-
-### Executar método específico
-
-```bash
-mvn -Dtest=LoginRestAssuredTest#ct01_loginWithValidCredentials test
-```
-
-### Execução paralela (JUnit 5)
-
-Arquivo: `src/test/resources/junit-platform.properties`
-
-```properties
-junit.jupiter.execution.parallel.enabled=true
-junit.jupiter.execution.parallel.mode.default=concurrent
-junit.jupiter.execution.parallel.mode.classes.default=concurrent
-junit.jupiter.execution.parallel.config.strategy=dynamic
-junit.jupiter.execution.parallel.config.dynamic.factor=2
-```
-
----
-
-## 🔍 Análise Estática de Código (PMD & Checkstyle)
-
-O projeto conta com ferramentas de auditoria e qualidade de código configuradas no `pom.xml`.
-
-### 🛡️ Executando a Análise Estática com PMD
-
-O **PMD 7.7.0** realiza a análise estática das classes de teste Java utilizando o conjunto de regras customizado [`pmd-ruleset.xml`](pmd-ruleset.xml).
-
-Para rodar a verificação do PMD:
-
+### Executar auditoria com PMD
 ```bash
 mvn pmd:check
 ```
 
-- **Arquivo de Regras**: [`pmd-ruleset.xml`](pmd-ruleset.xml)
+- **Arquivo de Regras Customizado**: [`pmd-ruleset.xml`](pmd-ruleset.xml)
 - **Relatório de Saída**: `target/pmd.xml`
 
-#### ⚙️ Estrutura do `pmd-ruleset.xml`
-
-O arquivo `pmd-ruleset.xml` estende os conjuntos padrão do PMD (`bestpractices`, `codestyle`, `errorprone`), aplicando exclusões específicas para testes de API com RestAssured:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="Custom PMD Ruleset for ServeRest"
-         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
-
-    <description>Regras customizadas do PMD ajustadas para suíte de testes de API com RestAssured e JUnit 5.</description>
-
-    <!-- Exclusões de Best Practices para automação de testes REST -->
-    <rule ref="category/java/bestpractices.xml">
-        <exclude name="UnitTestAssertionsShouldIncludeMessage" />
-        <exclude name="UnitTestShouldIncludeAssert" />
-        <exclude name="JUnit5TestShouldBePackagePrivate" />
-        <exclude name="UnitTestContainsTooManyAsserts" />
-    </rule>
-
-    <rule ref="category/java/codestyle.xml" />
-    <rule ref="category/java/errorprone.xml" />
-</ruleset>
-```
+---
 
 ## ⚙️ Esteira CI/CD - GitHub Actions
 
-Este projeto possui integração contínua configurada no GitHub Actions em:
+A integração contínua é executada automaticamente no GitHub Actions através do workflow `.github/workflows/api-tests.yml`.
 
-- Arquivo: `.github/workflows/api-tests.yml`
-
-### 🔁 Quando a esteira é executada
-
-- `push` em qualquer branch
-- `pull_request` aberto ou atualizado
-
-### 🧱 Passos principais do job `test`
-
-1. **Checkout do código**
-   - `actions/checkout@v4`
-2. **Configuração do Java 21**
-   - `actions/setup-java@v5` com:
-     - `java-version: '21'`
-     - `distribution: 'temurin'`
-3. **Execução dos testes via Maven**
-   - Comando: `mvn clean -Dtest=ExecutionBuilderRunner test`
-4. **Publicação de relatórios Allure**
-   - Publica `target/allure-report` via `peaceiris/actions-gh-pages@v4` na branch `gh-pages`, pasta `allure-reports`.
-
-### 🌐 Acesso ao relatório no GitHub Pages
-
-Após a execução da esteira:
-
-- URL do relatório:
-  - `https://reinaldorossetti.github.io/karate_api_java/allure-reports/index.html`
+### Passos da Esteira:
+1. Checkout do código-fonte.
+2. Configuração do ambiente **Java 23**.
+3. Execução dos testes automatizados via Maven.
+4. Geração do relatório **Allure Report**.
+5. Publicação automática no **GitHub Pages**.
 
 ---
 
 ## 📝 Exemplos de Testes
 
-### Exemplo 1: Configuração Base (BaseApiTest)
+### Exemplo 1: Configuração Base (`BaseApiTest`)
 
 ```java
-public class BaseApiTest {
+public abstract class BaseApiTest {
 
-    @BeforeAll
-    static void setup() {
-        RestAssured.baseURI = "https://serverest.dev";
-        RestAssured.requestSpecification = new RequestSpecBuilder()
-                .setContentType(ContentType.JSON)
-                .build();
-    }
+    public static final String ROTA_USUARIOS = "/usuarios";
+    public static final String ROTA_LOGIN = "/login";
 
     protected RequestSpecification givenWithAllure() {
-        return given()
-                .filter(new AllureRestAssured());
+        return RestAssured.given().filter(new AllureRestAssured());
     }
-}
-```
-
-### Exemplo 2: Login com sucesso (GET/POST)
-
-```java
-@Test
-@DisplayName("CT01 - Login com credenciais válidas e validação de token")
-void ct01_loginWithValidCredentials() {
-    String email = FakerUtils.randomEmail();
-    String password = "SenhaSegura@123";
-
-    // Cria usuário
-    givenWithAllure()
-        .body("{\"nome\":\"Teste\",\"email\":\"" + email + "\",\"password\":\"" + password + "\",\"administrador\":\"true\"}")
-    .when()
-        .post("/usuarios")
-    .then()
-        .statusCode(201);
-
-    // Realiza login
-    givenWithAllure()
-        .basePath("/login")
-        .body("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}")
-    .when()
-        .post()
-    .then()
-        .statusCode(200)
-        .body("message", equalTo("Login realizado com sucesso"))
-        .body("authorization", notNullValue());
-}
-```
-
-### Exemplo 3: Login inválido
-
-```java
-@Test
-@DisplayName("CT02 - Login com credenciais inválidas")
-void ct02_loginWithInvalidCredentials() {
-    givenWithAllure()
-        .basePath("/login")
-        .body("{\"email\":\"invalido@teste.com\",\"password\":\"senhaerrada\"}")
-    .when()
-        .post()
-    .then()
-        .statusCode(401)
-        .body("message", equalTo("Email e/ou senha inválidos"))
-        .body("authorization", nullValue());
-}
-```
-
-### Exemplo 4: Validação de campos obrigatórios
-
-```java
-@Test
-@DisplayName("CT03 - Validação de campos obrigatórios no login")
-void ct03_validateRequiredFields() {
-    // Email vazio
-    givenWithAllure()
-        .basePath("/login")
-        .body("{\"email\":\"\",\"password\":\"senha123\"}")
-    .when()
-        .post()
-    .then()
-        .statusCode(400)
-        .body("email", notNullValue());
-
-    // Senha vazia
-    givenWithAllure()
-        .basePath("/login")
-        .body("{\"email\":\"test@email.com\",\"password\":\"\"}")
-    .when()
-        .post()
-    .then()
-        .statusCode(400)
-        .body("password", notNullValue());
-}
-```
-
-### Exemplo 5: Uso do token em rota protegida
-
-```java
-@Test
-@DisplayName("CT04 - Login e uso de token em rota protegida")
-void ct04_loginAndUseTokenInProtectedRoute() {
-    String email = FakerUtils.randomEmail();
-    String password = "SenhaSegura@123";
-
-    // Cria usuário comum (não admin)
-    givenWithAllure()
-        .body("{\"nome\":\"Teste\",\"email\":\"" + email + "\",\"password\":\"" + password + "\",\"administrador\":\"false\"}")
-    .when()
-        .post("/usuarios")
-    .then()
-        .statusCode(201);
-
-    // Extrai token
-    String token = givenWithAllure()
-        .basePath("/login")
-        .body("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}")
-    .when()
-        .post()
-    .then()
-        .statusCode(200)
-        .extract().path("authorization");
-
-    // Tenta criar produto sem permissão de admin
-    givenWithAllure()
-        .header("Authorization", token)
-        .basePath("/produtos")
-        .body("{\"nome\":\"Produto Teste\",\"preco\":100,\"descricao\":\"Teste\",\"quantidade\":10}")
-    .when()
-        .post()
-    .then()
-        .statusCode(403)
-        .body("message", equalTo("Rota exclusiva para administradores"));
-}
-```
-
-### Exemplo 6: Teste parametrizado com CSV
-
-```java
-@ParameterizedTest(name = "CT05 - Email inválido: {0}")
-@CsvFileSource(resources = "/restassured/login/invalid-login-emails.csv", numLinesToSkip = 1)
-@Execution(ExecutionMode.CONCURRENT)
-@DisplayName("CT05 - Validação de formato de e-mail inválido")
-void ct05_validateInvalidEmailFormat(String invalidEmail) {
-    givenWithAllure()
-        .basePath("/login")
-        .body("{\"email\":\"" + invalidEmail + "\",\"password\":\"senha123\"}")
-    .when()
-        .post()
-    .then()
-        .statusCode(400)
-        .body("email", notNullValue());
-}
-```
-
-### Arquivo CSV utilizado no CT05
-
-`src/test/resources/restassured/login/invalid-login-emails.csv`
-
-```csv
-invalidEmail
-emailwithoutat
-@noname.com
-email@nodomain
-email
-12345@test.c
-!@#$%
-```
-
----
-
-## 🎯 Funcionalidades do Rest Assured
-
-### 1. RequestSpecification reutilizável
-
-```java
-RequestSpecification requestSpec = new RequestSpecBuilder()
-    .setBaseUri("https://serverest.dev")
-    .setContentType(ContentType.JSON)
-    .addFilter(new AllureRestAssured())
-    .build();
-
-given()
-    .spec(requestSpec)
-    .body(payload)
-.when()
-    .post("/login")
-.then()
-    .statusCode(200);
-```
-
-### 2. Extração de valores da resposta
-
-```java
-// Extrair campo simples
-String token = response.path("authorization");
-
-// Extrair com extract()
-String token = given()
-    .body(payload)
-.when()
-    .post("/login")
-.then()
-    .extract().path("authorization");
-
-// Extrair response completa
-Response response = given()
-    .body(payload)
-.when()
-    .post("/login")
-.then()
-    .extract().response();
-```
-
-### 3. Validações com Hamcrest
-
-```java
-.then()
-    .statusCode(200)
-    // Igualdade
-    .body("message", equalTo("Login realizado com sucesso"))
-    // Não nulo
-    .body("authorization", notNullValue())
-    // Nulo
-    .body("error", nullValue())
-    // Contém string
-    .body("message", containsString("sucesso"))
-    // Lista não vazia
-    .body("usuarios", not(empty()))
-    // Tamanho de lista
-    .body("usuarios.size()", greaterThan(0));
-```
-
-### 4. Variáveis e Reutilização
-
-```java
-// Dados dinâmicos com Faker
-String email    = FakerUtils.randomEmail();
-String name     = FakerUtils.randomName();
-String product  = FakerUtils.randomProduct();
-
-// Montar payload dinâmico
-String payload = String.format(
-    "{\"email\":\"%s\",\"password\":\"%s\"}", email, password
-);
-
-// Reutilizar token entre testes
-String token = loginAndGetToken(email, password);
-given().header("Authorization", token).when().get("/produtos");
-```
-
-### 5. Hooks e Setup com JUnit 5
-
-```java
-@TestInstance(Lifecycle.PER_CLASS)
-@Execution(ExecutionMode.CONCURRENT)
-public class LoginRestAssuredTest extends BaseApiTest {
 
     @BeforeAll
-    void init() {
+    static void setupRestAssured() {
         RestAssured.baseURI = "https://serverest.dev";
     }
+}
+```
 
-    @BeforeEach
-    void beforeEach(TestInfo testInfo) {
-        System.out.println("Executando: " + testInfo.getDisplayName());
-    }
+### Exemplo 2: Teste de Login com Sucesso (`LoginRestAssuredTest`)
+
+```java
+@Test
+@DisplayName("CT01 - Login com credenciais válidas")
+void loginWithValidCredentials() {
+    final String userEmail = FakerUtils.randomEmail();
+    final String userPassword = "SenhaSegura@123";
+
+    createUser(userEmail, userPassword, true)
+            .then()
+            .statusCode(201);
+
+    givenWithAllure()
+            .contentType(ContentType.JSON)
+            .basePath(ROTA_LOGIN)
+            .body("{\"email\": \"" + userEmail + "\", \"password\": \"" + userPassword + "\"}")
+            .when()
+            .post()
+            .then()
+            .statusCode(200)
+            .body(KEY_MESSAGE, equalTo("Login realizado com sucesso"))
+            .body(HEADER_AUTHORIZATION, notNullValue());
+}
+```
+
+### Exemplo 3: Teste Parametrizado com CSV (`LoginRestAssuredTest`)
+
+```java
+@ParameterizedTest(name = "CT05 - Validar e-mail com formato inválido: {0}")
+@CsvFileSource(resources = "/restassured/login/invalido-login.csv", numLinesToSkip = 1)
+@DisplayName("CT05 - Validação de formato de e-mail inválido")
+void validateInvalidEmailFormat(String invalidEmail) {
+    givenWithAllure()
+            .contentType(ContentType.JSON)
+            .basePath(ROTA_LOGIN)
+            .body("{\"email\": \"" + invalidEmail + "\", \"password\": \"SenhaSegura@123\"}")
+            .when()
+            .post()
+            .then()
+            .statusCode(400)
+            .body(KEY_EMAIL, equalTo("email deve ser um email válido"));
 }
 ```
 
 ---
 
-## 📊 Relatórios
+## 📊 Relatórios Allure
 
-Após executar os testes, relatórios Allure são gerados automaticamente:
-
-```
-target/allure-report/index.html
-```
-
-Para gerar e abrir o relatório localmente:
+Para gerar e abrir o relatório visual localmente após a execução dos testes:
 
 ```bash
 mvn allure:serve
 ```
 
-O relatório exibe:
-- ✅ Testes executados, passados e falhos
-- ⏱️ Tempo de execução por teste
-- 📋 Logs detalhados de request/response
-- 📊 Gráficos de cobertura e histórico de execuções
+O relatório interativo exibe:
+- Status de aprovação dos testes.
+- Anexo completo de requisições e respostas HTTP (corpo, headers, status code).
+- Gráficos de tempo de execução e cobertura das suítes.
 
 ---
 
-## 🎓 Boas Práticas
+## 🎓 Boas Práticas Aplicadas
 
-### 1. Organização das Classes de Teste
-
-- ✅ Uma classe por recurso (`LoginRestAssuredTest`, `UsuariosRestAssuredTest`)
-- ✅ Use `BaseApiTest` para configurações comuns
-- ✅ Nomeie os métodos de forma descritiva com prefixo `ct0X_`
-
-### 2. Anotações para Organização
-
-```java
-@Tag("smoke")       // Testes críticos de smoke
-@Tag("regression")  // Suite de regressão completa
-@Tag("login")       // Testes de login
-@Disabled           // Temporariamente desabilitado
-```
-
-### 3. Reutilização de Código
-
-- ✅ Crie métodos helper (ex: `loginAndGetToken()`, `createUser()`)
-- ✅ Use `RequestSpecification` para configurações comuns
-- ✅ Centralize constantes em classes utilitárias
-
-### 4. Dados de Teste
-
-```java
-// Sempre use dados dinâmicos para evitar conflitos
-String email    = FakerUtils.randomEmail();
-String product  = FakerUtils.randomProduct() + System.currentTimeMillis();
-
-// Evite dados estáticos hardcoded que podem causar conflitos
-```
-
-### 5. Validações Completas
-
-```java
-// Sempre valide:
-.statusCode(200)                             // Status code
-.body("message", equalTo("..."))             // Mensagem de resposta
-.body("authorization", notNullValue())       // Campos obrigatórios
-.header("Content-Type", containsString("application/json")) // Headers
-```
-
----
-
-## 📚 Recursos Adicionais
-
-### Documentação Oficial
-
-- 🧪 **Rest Assured**: https://rest-assured.io/
-- 🌐 **ServeRest**: https://serverest.dev/
-- ☕ **JUnit 5**: https://junit.org/junit5/
-- 📊 **Allure**: https://docs.qameta.io/allure/
-
-### Tutoriais e Cursos
-
-- [Rest Assured Official Documentation](https://github.com/rest-assured/rest-assured/wiki/Usage)
-- [Hamcrest Matchers](http://hamcrest.org/JavaHamcrest/javadoc/2.2/)
-- [ServeRest GitHub](https://github.com/ServeRest/ServeRest)
-
-### Comunidade
-
-- [Stack Overflow - Rest Assured Tag](https://stackoverflow.com/questions/tagged/rest-assured)
-- [Rest Assured GitHub Issues](https://github.com/rest-assured/rest-assured/issues)
-
----
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Para contribuir:
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
-
----
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+1. **Separação por Recurso**: Suítes isoladas por domínio ([UsersRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/usuarios/UsersRestAssuredTest.java), [ProductsRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/produtos/ProductsRestAssuredTest.java), [CartsRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/carrinhos/CartsRestAssuredTest.java), [LoginRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/login/LoginRestAssuredTest.java)).
+2. **Dados Dinâmicos**: Uso de [FakerUtils.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/utils/FakerUtils.java) para gerar massas de teste sem causar colisões.
+3. **Padrão DRY (Don't Repeat Yourself)**: Reutilização de especificações na classe base [BaseApiTest.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/BaseApiTest.java).
+4. **Respeito aos Princípios SOLID & Clean Code**: Métodos pequenos, tipagem estrita e nomes descritivos.
 
 ---
 
 ## 👨‍💻 Autor
 
-Desenvolvido para fins de estudo e prática de automação de testes de API.
-
----
-
-Referências:
-- https://rest-assured.io/
-- https://junit.org/junit5/
-- https://github.com/rest-assured/rest-assured/wiki/Usage
-
-**🚀 Happy Testing!** 🧪
+Desenvolvido por **Reinaldo Rossetti** para automação de testes de API REST em Java.
