@@ -20,7 +20,7 @@ import restassured_serverest.utils.FakerUtils;
 
 @TestInstance(Lifecycle.PER_CLASS)
 @Execution(ExecutionMode.CONCURRENT)
-public class LoginRestAssuredTest extends BaseApiTest {
+public class LoginFeatureTests extends BaseApiTest {
 
     private Response createUser(final String email, final String password, final boolean admin) {
         final String payload = String.format(

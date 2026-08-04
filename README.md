@@ -10,7 +10,7 @@ Projeto de automação de testes de API utilizando **Rest Assured** e **Java 23*
 Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), relatórios interativos com **Allure Report**, análise estática via **PMD 7** e esteira de CI/CD via **GitHub Actions**.
 
 - **Repositório**: [https://github.com/reinaldorossetti/serverest_restassured_java](https://github.com/reinaldorossetti/serverest_restassured_java)
-- **Relatório no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-reports/index.html](https://reinaldorossetti.github.io/serverest_restassured_java/allure-reports/index.html)
+- **Relatório no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-reports/index.html)
 - **Mapeamento de Testes**: [TESTING_API.MD](TESTING_API.MD)
 - **Requisitos do Projeto**: [Requisitos.md](Requisitos.md)
 
@@ -34,7 +34,8 @@ Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), re
 
 ## 🧪 Sobre o Rest Assured
 
-**Rest Assured** é uma biblioteca Java open-source amplamente utilizada para automação de testes de APIs REST. Ela oferece uma DSL (Domain Specific Language) fluente baseada no padrão BDD `given().when().then()`.
+**Rest Assured** é uma biblioteca Java open-source amplamente utilizada para automação de testes de APIs REST. 
+Ela oferece uma DSL (Domain Specific Language) fluente baseada no padrão BDD `given().when().then()`.
 
 ### ✨ Principais Características
 
@@ -58,7 +59,6 @@ Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), re
 |---------|-----------|-----------|
 | **Login** | `POST /login` | Autenticação e geração de token JWT |
 | **Usuários** | `GET, POST, PUT, DELETE /usuarios` | Gerenciamento de cadastro de usuários |
-| **Carrinhos** | `GET, POST, DELETE /carrinhos` | Gerenciamento e finalização de compras |
 
 ### 🔗 Base URL
 ```
@@ -78,12 +78,8 @@ serverest_restassured_java/
 │       │   └── restassured_serverest/
 │       │       ├── BaseApiTest.java               # Configurações base (BaseURI, RequestSpecs, Filtro Allure)
 │       │       ├── ExecutionBuilderRunner.java    # Suíte runner de execução dos testes JUnit
-│       │       ├── carrinhos/
-│       │       │   └── CartsRestAssuredTest.java  # Suíte de testes do recurso Carrinhos
 │       │       ├── login/
 │       │       │   └── LoginRestAssuredTest.java  # Suíte de testes do recurso Login
-│       │       ├── produtos/
-│       │       │   └── ProductsRestAssuredTest.java # Suíte de testes do recurso Produtos
 │       │       ├── usuarios/
 │       │       │   └── UsersRestAssuredTest.java  # Suíte de testes do recurso Usuários
 │       │       └── utils/
@@ -268,6 +264,9 @@ O relatório interativo exibe:
 2. **Dados Dinâmicos**: Uso de [FakerUtils.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/utils/FakerUtils.java) para gerar massas de teste sem causar colisões.
 3. **Padrão DRY (Don't Repeat Yourself)**: Reutilização de especificações na classe base [BaseApiTest.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/BaseApiTest.java).
 4. **Respeito aos Princípios SOLID & Clean Code**: Métodos pequenos, tipagem estrita e nomes descritivos.
+
+5. **Validações de API**: Seguindo as melhores práticas de validação de APIs REST, conforme detalhado neste artigo:
+https://reiload-88128.medium.com/quais-validações-devo-realizar-em-uma-api-postman-ca99eeae81dd
 
 ---
 

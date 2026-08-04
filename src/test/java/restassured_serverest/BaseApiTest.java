@@ -6,6 +6,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
+import restassured_serverest.utils.FakerUtils;
 
 public abstract class BaseApiTest {
 
@@ -19,6 +20,7 @@ public abstract class BaseApiTest {
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_EMAIL = "email";
     public static final String KEY_NOME = "nome";
+    public static final String KEY_PASSWORD = "password";
     public static final String KEY_ADMINISTRADOR = "administrador";
 
     static Dotenv dotenv = Dotenv.configure()
@@ -29,6 +31,33 @@ public abstract class BaseApiTest {
 
     protected RequestSpecification givenWithAllure() {
         return RestAssured.given().filter(new AllureRestAssured());
+    }
+
+    protected String bodyPayload(String name, String email, String  password, String administrador) {
+        return "{\n" +
+                "  \"nome\": \"" + name + "\",\n" +
+                "  \"email\": \"" + email + "\",\n" +
+                "  \"password\": \"" + password + "\",\n" +
+                "  \"administrador\": \"" + administrador + "\"" +
+                "}";
+    }
+
+    protected String bodyEmail(String email) {
+        final String name = FakerUtils.randomName();
+        final String password = FakerUtils.randomPassword();
+
+        return "{\n  \"nome\": \""+ name + "\",\n  \"email\": \""+ email + "\",\n  " +
+                "\"password\": \"" + password + "\",\n  \"administrador\": \"false\"\n}";
+    }
+
+    protected String bodyEmailAndPassword(String email, String password) {
+
+        return "{" +
+                "\"nome\":\"Cart Default User\"," +
+                "\"email\":\"" + email + "\"," +
+                "\"password\":\"" + password + "\"," +
+                "\"administrador\":\"true\"" +
+                "}";
     }
 
     @BeforeAll
