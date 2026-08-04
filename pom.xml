@@ -15,6 +15,7 @@
         <java.version>23</java.version>
         <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>23</maven.compiler.target>
+        <dotenv.java.version>3.2.0</dotenv.java.version>
 
         <!-- ✅ alinhar JUnit 5 + Platform -->
         <junit5.version>5.10.1</junit5.version>
@@ -22,7 +23,12 @@
         <allure.version>2.17.0</allure.version>
     </properties>
 
-    <dependencies>        
+    <dependencies>
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>${dotenv.java.version}</version>
+        </dependency>        
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

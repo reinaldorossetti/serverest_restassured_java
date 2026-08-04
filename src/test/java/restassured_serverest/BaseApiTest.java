@@ -2,6 +2,7 @@ package restassured_serverest;
 
 import org.junit.jupiter.api.BeforeAll;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
@@ -20,12 +21,18 @@ public abstract class BaseApiTest {
     public static final String KEY_NOME = "nome";
     public static final String KEY_ADMINISTRADOR = "administrador";
 
+    static Dotenv dotenv = Dotenv.configure()
+        .directory("./.env")
+        .ignoreIfMalformed()
+        .ignoreIfMissing()
+        .load();
+
     protected RequestSpecification givenWithAllure() {
         return RestAssured.given().filter(new AllureRestAssured());
     }
 
     @BeforeAll
     static void setupRestAssured() {
-        RestAssured.baseURI = "https://serverest.dev";
+        RestAssured.baseURI = dotenv.get("BASE_URL");
     }
 }
