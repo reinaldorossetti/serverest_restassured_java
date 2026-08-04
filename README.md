@@ -58,7 +58,6 @@ Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), re
 |---------|-----------|-----------|
 | **Login** | `POST /login` | Autenticação e geração de token JWT |
 | **Usuários** | `GET, POST, PUT, DELETE /usuarios` | Gerenciamento de cadastro de usuários |
-| **Produtos** | `GET, POST, PUT, DELETE /produtos` | Gerenciamento do catálogo de produtos (requer admin) |
 | **Carrinhos** | `GET, POST, DELETE /carrinhos` | Gerenciamento e finalização de compras |
 
 ### 🔗 Base URL

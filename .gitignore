@@ -27,6 +27,8 @@ replay_pid*
 
 target/
 build/
+allure-results/
+
 .idea/
-.vscode
-.allure
+.vscode/
+.allure/
