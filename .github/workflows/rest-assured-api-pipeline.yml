@@ -59,6 +59,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y wkhtmltopdf
           wkhtmltopdf --enable-local-file-access target/allure-report/index.html target/allure-report.pdf
+        continue-on-error: true
 
       - name: Upload RestAssured Reports
         if: always()
@@ -83,10 +84,12 @@ jobs:
           from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
           body: "Olá,\n\nSegue em anexo o relatório em PDF dos testes de API executados no GitHub Actions.\n\nAtenciosamente,\nPipeline CI/CD"
           attachments: target/allure-report.pdf
+        continue-on-error: true
 
       - name: Encerrar ambiente Docker
         if: always()
         run: docker compose -f docker-compose.serverest.yml down
+        continue-on-error: true
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
