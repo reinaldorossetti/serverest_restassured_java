@@ -40,14 +40,14 @@ O projeto também inclui:
 
 Para rodar os testes (Observação precisa do Java JDK 23+ e Maven 3.6+):
 ````bash
+git clone https://github.com/reinaldorossetti/serverest_restassured_java.git
+cd serverest_restassured_java
 mvn clean test
 ````
 
-- **Repositório**: [https://github.com/reinaldorossetti/serverest_restassured_java](https://github.com/reinaldorossetti/serverest_restassured_java)
+- **Relatório dos Testes no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/)
 
-- **Relatório no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/)
-
-- **Mapeamento de Testes**: [TESTING_API.MD](TESTING_API.MD)
+- **Mapeamento dos Testes**: [TESTING_API.MD](TESTING_API.MD)
 
 - **Requisitos do Projeto**: [Requisitos.md](Requisitos.md)
 

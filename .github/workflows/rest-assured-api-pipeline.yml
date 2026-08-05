@@ -56,9 +56,8 @@ jobs:
       - name: Gerar PDF do Allure Report
         if: always()
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wkhtmltopdf
-          wkhtmltopdf --enable-local-file-access target/allure-report/index.html target/allure-report.pdf
+          pip install allure-docx
+          allure-docx --pdf target/allure-report
         continue-on-error: true
 
       - name: Upload RestAssured Reports
@@ -69,22 +68,6 @@ jobs:
           path: |
             target/allure-report
             target/allure-report.pdf
-
-      - name: Enviar Allure Report por E-mail
-        if: always()
-        uses: dawidd6/action-send-mail@v18
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          secure: true
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "📊 Relatório de Testes de API - Allure Report (PDF)"
-          to: reiload@gmail.com
-          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
-          body: "Olá,\n\nSegue em anexo o relatório em PDF dos testes de API executados no GitHub Actions.\n\nAtenciosamente,\nPipeline CI/CD"
-          attachments: target/allure-report.pdf
-        continue-on-error: true
 
       - name: Encerrar ambiente Docker
         if: always()
