@@ -56,8 +56,8 @@ jobs:
       - name: Gerar PDF do Allure Report
         if: always()
         run: |
-          pip install allure-docx
-          allure-docx --pdf target/allure-report
+          npm install -g allure-commandline
+          allure generate --single-file target/allure-results --clean -o target/allure-report
         continue-on-error: true
 
       - name: Upload RestAssured Reports
