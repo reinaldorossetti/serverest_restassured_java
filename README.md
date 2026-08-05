@@ -10,7 +10,7 @@ Projeto de automação de testes de API utilizando **Rest Assured** e **Java 23*
 Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), relatórios interativos com **Allure Report**, análise estática via **PMD 7** e esteira de CI/CD via **GitHub Actions**.
 
 - **Repositório**: [https://github.com/reinaldorossetti/serverest_restassured_java](https://github.com/reinaldorossetti/serverest_restassured_java)
-- **Relatório no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-reports/index.html)
+- **Relatório no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/)
 - **Mapeamento de Testes**: [TESTING_API.MD](TESTING_API.MD)
 - **Requisitos do Projeto**: [Requisitos.md](Requisitos.md)
 
@@ -60,6 +60,8 @@ Ela oferece uma DSL (Domain Specific Language) fluente baseada no padrão BDD `g
 |---------|-----------|-----------|
 | **Login** | `POST /login` | Autenticação e geração de token JWT |
 | **Usuários** | `GET, POST, PUT, DELETE /usuarios` | Gerenciamento de cadastro de usuários |
+| **Carrinhos** | `GET, POST, DELETE /carrinhos` | Fluxo de criação, consulta e conclusão/cancelamento de compra |
+| **Produtos** | `POST /produtos` | Cadastro de produtos (cenários autenticados e autorização) |
 
 ### 🔗 Base URL
 ```
@@ -76,7 +78,7 @@ Este projeto possui suporte para execução local da API ServeRest com Docker e 
 Subir o ambiente:
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.serverest.yml up -d
 ```
 
 Validar se a API está no ar:
@@ -89,14 +91,18 @@ http://localhost:3000/status
 Encerrar o ambiente:
 
 ```bash
-docker compose down
+docker compose -f docker-compose.serverest.yml down
 ```
 
-> A URL usada pelos testes é controlada por `BASE_URL` no arquivo `.env`.
+> A URL usada pelos testes é controlada por `BASE_URL_DEV` e `BASE_URL_PROD` no arquivo `.env`.
+
+Comportamento atual:
+- `CI=true` (pipeline): usa `BASE_URL_DEV` (fallback: `http://localhost:3000`)
+- Execução local: usa `BASE_URL_PROD` (fallback: `https://serverest.dev`)
 
 ### Docker na pipeline (GitHub Actions)
 
-Na esteira, o ambiente também sobe via Docker (`docker compose up -d`) antes da execução dos testes para garantir previsibilidade e independência de ambientes externos.
+Na esteira, o ambiente também sobe via Docker (`docker compose -f docker-compose.serverest.yml up -d`) antes da execução dos testes para garantir previsibilidade e independência de ambientes externos.
 
 ---
 
@@ -110,21 +116,22 @@ serverest_restassured_java/
 │       ├── java/
 │       │   └── restassured_serverest/
 │       │       ├── BaseApiTest.java               # Configurações base (BaseURI, RequestSpecs, Filtro Allure)
-│       │       ├── ExecutionBuilderRunner.java    # Suíte runner de execução dos testes JUnit
 │       │       ├── login/
-│       │       │   └── LoginRestAssuredTest.java  # Suíte de testes do recurso Login
+│       │       │   └── LoginFeatureTests.java     # Suíte de testes do recurso Login
+│       │       ├── carrinhos/
+│       │       │   └── CartsFeatureTests.java     # Suíte de testes do recurso Carrinhos
 │       │       ├── usuarios/
-│       │       │   └── UsersRestAssuredTest.java  # Suíte de testes do recurso Usuários
+│       │       │   └── UsersFeatureTests.java     # Suíte de testes do recurso Usuários
 │       │       └── utils/
 │       │           └── FakerUtils.java            # Utilitário para geração de dados dinâmicos
 │       │
 │       └── resources/
-│           ├── logback-test.xml                   # Configuração de logs do projeto
 │           └── restassured/
 │               └── login/
-│                   └── invalido-login.csv         # Massa de dados para teste parametrizado
+│                   └── invalid-login-emails.csv   # Massa de dados para teste parametrizado
 │
 ├── pmd-ruleset.xml                               # Regras customizadas da análise estática PMD 7
+├── docker-compose.serverest.yml                  # Compose da API ServeRest local/CI
 ├── pom.xml                                       # Gerenciamento de dependências e plugins Maven
 ├── Requisitos.md                                 # Especificações dos requisitos do projeto
 ├── TESTING_API.MD                                # Mapeamento completo dos cenários de teste
@@ -136,7 +143,7 @@ serverest_restassured_java/
 ## 🔧 Pré-requisitos
 
 - **Java JDK 23**
-- **Maven 3.8+** (ou o Maven Wrapper `./mvnw` incluso)
+- **Maven 3.6+** (ou o Maven Wrapper `./mvnw` incluso)
 - **Docker Desktop** (opcional para rodar o ServeRest localmente)
 - **IDE** (VS Code, IntelliJ IDEA ou Eclipse)
 
@@ -172,12 +179,12 @@ mvn clean test
 
 ### 3. Executar uma suíte específica
 ```bash
-mvn test -Dtest=UsersRestAssuredTest
+mvn "-Dtest=restassured_serverest.usuarios.UsersFeatureTests" test
 ```
 
-### 4. Executar via Runner de Testes
+### 4. Executar suíte de login
 ```bash
-mvn test -Dtest=ExecutionBuilderRunner
+mvn "-Dtest=restassured_serverest.login.LoginFeatureTests" test
 ```
 
 ### 5. Subir o ServeRest local com Docker
@@ -185,7 +192,7 @@ mvn test -Dtest=ExecutionBuilderRunner
 O projeto possui configuração pronta para executar a API localmente:
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.serverest.yml up -d
 ```
 
 Verifique se a API subiu corretamente:
@@ -198,10 +205,10 @@ http://localhost:3000/status
 Para parar e remover o container local:
 
 ```bash
-docker compose down
+docker compose -f docker-compose.serverest.yml down
 ```
 
-> Observação: os testes usam a variável `BASE_URL` no arquivo `.env`. Para execução local com Docker, mantenha `BASE_URL=http://localhost:3000`.
+> Observação: para CI com Docker use `BASE_URL_DEV=http://localhost:3000`; para execução local mantenha `BASE_URL_PROD=https://serverest.dev`.
 
 ---
 
@@ -221,14 +228,15 @@ mvn pmd:check
 
 ## ⚙️ Esteira CI/CD - GitHub Actions
 
-A integração contínua é executada automaticamente no GitHub Actions através do workflow `.github/workflows/api-tests.yml`.
+A integração contínua é executada automaticamente no GitHub Actions através do workflow `.github/workflows/rest-assured-api-pipeline.yml`.
 
 ### Passos da Esteira:
 1. Checkout do código-fonte.
-2. Configuração do ambiente **Java 23**.
-3. Execução dos testes automatizados via Maven.
-4. Geração do relatório **Allure Report**.
-5. Publicação automática no **GitHub Pages**.
+2. Subida da API local via Docker Compose.
+3. Configuração do ambiente **Java 23**.
+4. Execução dos testes automatizados via Maven.
+5. Geração do relatório **Allure Report** e PDF.
+6. Upload de artefatos, envio de e-mail e publicação automática no **GitHub Pages**.
 
 ---
 
@@ -248,53 +256,71 @@ public abstract class BaseApiTest {
 
     @BeforeAll
     static void setupRestAssured() {
-        RestAssured.baseURI = "https://serverest.dev";
+        final boolean isCi = "true".equalsIgnoreCase(System.getenv("CI"));
+        final String devUrl = DOTENV.get("BASE_URL_DEV");
+        final String prodUrl = DOTENV.get("BASE_URL_PROD");
+
+        if (isCi) {
+            RestAssured.baseURI = devUrl != null && !devUrl.isBlank() ? devUrl : "http://localhost:3000";
+        } else {
+            RestAssured.baseURI = prodUrl != null && !prodUrl.isBlank() ? prodUrl : "https://serverest.dev";
+        }
     }
 }
 ```
 
-### Exemplo 2: Teste de Login com Sucesso (`LoginRestAssuredTest`)
+### Exemplo 2: Teste de Login com Sucesso (`LoginFeatureTests`) usando `Map`
 
 ```java
 @Test
 @DisplayName("CT01 - Login com credenciais válidas")
 void loginWithValidCredentials() {
     final String userEmail = FakerUtils.randomEmail();
-    final String userPassword = "SenhaSegura@123";
+    final String userPassword = DEFAULT_PASSWORD;
 
-    createUser(userEmail, userPassword, true)
+    createUser(userEmail, userPassword, false)
             .then()
             .statusCode(201);
+
+    final Map<String, Object> loginPayload = Map.of(
+        KEY_EMAIL, userEmail,
+        KEY_PASSWORD, userPassword
+    );
 
     givenWithAllure()
             .contentType(ContentType.JSON)
             .basePath(ROTA_LOGIN)
-            .body("{\"email\": \"" + userEmail + "\", \"password\": \"" + userPassword + "\"}")
+        .body(loginPayload)
             .when()
             .post()
             .then()
             .statusCode(200)
             .body(KEY_MESSAGE, equalTo("Login realizado com sucesso"))
-            .body(HEADER_AUTHORIZATION, notNullValue());
+        .body("authorization", notNullValue());
 }
 ```
 
-### Exemplo 3: Teste Parametrizado com CSV (`LoginRestAssuredTest`)
+### Exemplo 3: Teste Parametrizado com CSV (`LoginFeatureTests`) usando `Map`
 
 ```java
 @ParameterizedTest(name = "CT05 - Validar e-mail com formato inválido: {0}")
-@CsvFileSource(resources = "/restassured/login/invalido-login.csv", numLinesToSkip = 1)
+@CsvFileSource(resources = "/restassured/login/invalid-login-emails.csv", numLinesToSkip = 1)
 @DisplayName("CT05 - Validação de formato de e-mail inválido")
 void validateInvalidEmailFormat(String invalidEmail) {
+    final Map<String, Object> payload = Map.of(
+        KEY_EMAIL, invalidEmail,
+        KEY_PASSWORD, "senha123"
+    );
+
     givenWithAllure()
             .contentType(ContentType.JSON)
             .basePath(ROTA_LOGIN)
-            .body("{\"email\": \"" + invalidEmail + "\", \"password\": \"SenhaSegura@123\"}")
+        .body(payload)
             .when()
             .post()
             .then()
             .statusCode(400)
-            .body(KEY_EMAIL, equalTo("email deve ser um email válido"));
+        .body(KEY_EMAIL, notNullValue());
 }
 ```
 
@@ -317,12 +343,13 @@ O relatório interativo exibe:
 
 ## 🎓 Boas Práticas Aplicadas
 
-1. **Separação por Recurso**: Suítes isoladas por domínio ([UsersRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/usuarios/UsersRestAssuredTest.java), [ProductsRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/produtos/ProductsRestAssuredTest.java), [CartsRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/carrinhos/CartsRestAssuredTest.java), [LoginRestAssuredTest](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/login/LoginRestAssuredTest.java)).
+1. **Separação por Recurso**: Suítes isoladas por domínio (`UsersFeatureTests`, `CartsFeatureTests`, `LoginFeatureTests`).
 2. **Dados Dinâmicos**: Uso de [FakerUtils.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/utils/FakerUtils.java) para gerar massas de teste sem causar colisões.
 3. **Padrão DRY (Don't Repeat Yourself)**: Reutilização de especificações na classe base [BaseApiTest.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/BaseApiTest.java).
-4. **Respeito aos Princípios SOLID & Clean Code**: Métodos pequenos, tipagem estrita e nomes descritivos.
+4. **Payloads tipados**: Uso de `Map`/`List` ao invés de JSON manual em `String`, reduzindo erros de serialização.
+5. **Respeito aos Princípios SOLID & Clean Code**: Métodos pequenos, tipagem estrita e nomes descritivos.
 
-5. **Validações de API**: Seguindo as melhores práticas de validação de APIs REST, conforme detalhado neste artigo:
+6. **Validações de API**: Seguindo as melhores práticas de validação de APIs REST, conforme detalhado neste artigo:
 https://reiload-88128.medium.com/quais-validações-devo-realizar-em-uma-api-postman-ca99eeae81dd
 
 ---
