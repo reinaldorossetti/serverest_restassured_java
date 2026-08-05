@@ -42,6 +42,10 @@ O projeto também inclui:
 
 
 Para rodar os testes (Observação precisa do Java JDK 23+ e Maven 3.6+):
+
+- Download Java JDK 23: [Oracle JDK 23 Downloads](https://www.oracle.com/java/technologies/javase/jdk23-archive-downloads.html)
+- Download Maven 3.6+: [Apache Maven Downloads](https://maven.apache.org/download.cgi)
+
 ````bash
 git clone https://github.com/reinaldorossetti/serverest_restassured_java.git
 cd serverest_restassured_java
@@ -188,8 +192,8 @@ serverest_restassured_java/
 
 ## 🔧 Pré-requisitos
 
-- **Java JDK 23**
-- **Maven 3.6+** (ou o Maven Wrapper `./mvnw` incluso)
+- **Java JDK 23** — [Baixar Java 23](https://www.oracle.com/java/technologies/downloads/#jdk23-windows)
+- **Maven 3.6+** (ou o Maven Wrapper `./mvnw` incluso) — [Baixar Maven](https://maven.apache.org/download.cgi)
 - **Docker Desktop** (opcional para rodar o ServeRest localmente)
 - **IDE** (VS Code, IntelliJ IDEA ou Eclipse)
 
