@@ -1,0 +1,32 @@
+<div>POST to http://localhost:3000/produtos</div>
+
+<h4>Body</h4>
+<div>
+    <pre class="preformated-text">
+    {
+    &quot;descricao&quot;: &quot;Product created for cart lifecycle test&quot;,
+    &quot;nome&quot;: &quot;Practical Bronze Knife 85341949522&quot;,
+    &quot;preco&quot;: 150,
+    &quot;quantidade&quot;: 10
+}
+    </pre>
+</div>
+
+<h4>Headers</h4>
+<div>
+        <div>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG5uaWUuODA1NTkzOTI5NDhAZ21haWwuY29tIiwicGFzc3dvcmQiOiJTZW5oYVNlZ3VyYUAxMjMiLCJpYXQiOjE3ODU4OTgzMDMsImV4cCI6MTc4NTg5ODkwM30.aIo9iTR-oS0uT4yubaJlqe-Z4fIdbPCGvffhGOgtbzA</div>
+        <div>Accept: */*</div>
+        <div>Content-Type: application/json</div>
+</div>
+
+
+
+<h4>Curl</h4>
+<div>
+curl -v -X POST &#39;http://localhost:3000/produtos&#39; -H &#39;Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG5uaWUuODA1NTkzOTI5NDhAZ21haWwuY29tIiwicGFzc3dvcmQiOiJTZW5oYVNlZ3VyYUAxMjMiLCJpYXQiOjE3ODU4OTgzMDMsImV4cCI6MTc4NTg5ODkwM30.aIo9iTR-oS0uT4yubaJlqe-Z4fIdbPCGvffhGOgtbzA&#39; -H &#39;Accept: */*&#39; -H &#39;Content-Type: application/json&#39; -d &#39;{
+    &quot;descricao&quot;: &quot;Product created for cart lifecycle test&quot;,
+    &quot;nome&quot;: &quot;Practical Bronze Knife 85341949522&quot;,
+    &quot;preco&quot;: 150,
+    &quot;quantidade&quot;: 10
+}&#39;
+</div>
