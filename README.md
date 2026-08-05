@@ -36,7 +36,10 @@ O projeto também inclui:
     - `RateLimitLoadTests`: **1** (execução manual)
 - **Total:** **31 cenários automatizados**
 
-**Obs:** No Relatório o total de testes é exibido como **38**, pois alguns cenários possuem **testes parametrizados** (ex.: CT05 - Login com e-mails inválidos).
+**Obs:** No Relatório o total de testes é exibido como **40**, pois alguns cenários possuem **testes parametrizados** (ex.: CT05 - Login com e-mails inválidos).
+
+![Allure Report - 40 casos de teste com 100% de sucesso](docs/images/allure-report-2026-08-05.png)
+
 
 Para rodar os testes (Observação precisa do Java JDK 23+ e Maven 3.6+):
 ````bash
