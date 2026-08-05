@@ -7,6 +7,7 @@ import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import restassured_serverest.utils.FakerUtils;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public abstract class BaseApiTest {
@@ -48,33 +49,65 @@ public abstract class BaseApiTest {
         return RestAssured.given().filter(new AllureRestAssured());
     }
 
-    protected String bodyPayload(final String name, final String email, final String  password, final String administrador) {
-        return "{\n" +
-                "  \"nome\": \"" + name + "\",\n" +
-                "  \"email\": \"" + email + "\",\n" +
-                "  \"password\": \"" + password + "\",\n" +
-                "  \"administrador\": \"" + administrador + "\"" +
-                "}";
+    /**
+     * Monta o payload padrão de criação/atualização de usuário.
+     *
+     * @param name nome do usuário
+     * @param email e-mail do usuário
+     * @param password senha do usuário
+     * @param administrador flag de administrador ({@code "true"} ou {@code "false"})
+     * @return payload no formato esperado pela API de usuários
+     */
+    protected Map<String, Object> bodyPayload(final String name, final String email, final String  password, final String administrador) {
+        return Map.of(
+                KEY_NOME, name,
+                KEY_EMAIL, email,
+                KEY_PASSWORD, password,
+                KEY_ADMINISTRADOR, administrador);
     }
 
-    protected String bodyEmail(final String email) {
+    /**
+     * Monta um payload de usuário com e-mail informado e dados aleatórios para nome/senha.
+     *
+     * @param email e-mail a ser utilizado no payload
+     * @return payload de usuário com {@code administrador = "false"}
+     */
+    protected Map<String, Object> bodyEmail(final String email) {
         final String name = FakerUtils.randomName();
         final String password = FakerUtils.randomPassword();
 
-        return "{\n  \"nome\": \""+ name + "\",\n  \"email\": \""+ email + "\",\n  " +
-                "\"password\": \"" + password + "\",\n  \"administrador\": \"false\"\n}";
+        return Map.of(
+                KEY_NOME, name,
+                KEY_EMAIL, email,
+                KEY_PASSWORD, password,
+                KEY_ADMINISTRADOR, "false");
     }
 
-    protected String bodyEmailAndPassword(final String email, final String password) {
-
-        return "{" +
-                "\"nome\":\"Cart Default User\"," +
-                "\"email\":\"" + email + "\"," +
-                "\"password\":\"" + password + "\"," +
-                "\"administrador\":\"true\"" +
-                "}";
+    /**
+     * Monta um payload de usuário com nome fixo para cenários de autenticação/carrinho.
+     *
+     * @param email e-mail do usuário
+     * @param password senha do usuário
+     * @return payload de usuário com {@code administrador = "true"}
+     */
+    protected Map<String, Object> bodyEmailAndPassword(final String email, final String password) {
+        return Map.of(
+                KEY_NOME, "Cart Default User",
+                KEY_EMAIL, email,
+                KEY_PASSWORD, password,
+                KEY_ADMINISTRADOR, "true");
     }
 
+    /**
+     * Configura a {@code baseURI} global do RestAssured antes da execução dos testes.
+     * <p>
+     * Regras aplicadas:
+     * <ul>
+     *   <li>Quando {@code CI=true}, prioriza {@code BASE_URL_DEV}; se ausente/vazia, usa {@code http://localhost:3000}.</li>
+     *   <li>Fora de CI, prioriza {@code BASE_URL_PROD}; se ausente/vazia, usa {@code https://serverest.dev}.</li>
+     * </ul>
+     * As variáveis são carregadas via {@code dotenv} (arquivo {@code .env}, quando presente).
+     */
     @BeforeAll
     static void setupRestAssured() {
         final boolean isCi = "true".equalsIgnoreCase(System.getenv("CI"));

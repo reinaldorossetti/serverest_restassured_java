@@ -1,236 +1,133 @@
-# Documentação da API ServeRest (resumo)
+# Mapeamento de Testes da API ServeRest (estado atual)
 
-Esta API de testes utiliza o **ServeRest**, uma API pública que simula uma loja virtual.
+Este documento reflete **o estado real do projeto atual** (JUnit 5 + Rest Assured), incluindo testes funcionais e não funcionais.
 
-- Documentação oficial (Swagger): https://serverest.dev/?lang=pt-BR  
-- Swagger JSON: https://serverest.dev/swagger.json?lang=pt-BR
-
-> Sempre consulte o Swagger oficial para detalhes completos de request/response, exemplos e códigos de erro. Abaixo está apenas um resumo das rotas principais para facilitar os testes automatizados deste projeto.
-
----
-
-## Base URL
-
-Ambiente público do ServeRest:
-
-```text
-https://serverest.dev
-```
-
-Todas as rotas abaixo são relativas a essa URL.
+- Base URL pública: `https://serverest.dev`
+- Classe base: `src/test/java/restassured_serverest/BaseApiTest.java`
+- Frameworks: JUnit 5, Rest Assured, Hamcrest, Allure
 
 ---
 
-## Autenticação (Login)
+## Resumo executivo
 
-Autentica um usuário previamente cadastrado e retorna um token de acesso.
+### Quantidade de cenários
 
-| Método | Caminho    | Descrição         |
-|--------|-----------|-------------------|
-| POST   | `/login`  | Realizar login    |
+- `LoginFeatureTests`: **5**
+- `UsersFeatureTests`: **18**
+- `CartsFeatureTests`: **7**
+- `RateLimitLoadTests` (NFR/carga): **1**
 
-- Corpo da requisição: credenciais de usuário (e-mail e senha).
-- Resposta de sucesso: token JWT para ser usado nas rotas que exigem autenticação/administrador.
+**Total: 31 cenários automatizados**
 
----
+### Endpoints cobertos
 
-## Usuários
+- `POST /login`
+- `GET, POST, PUT, DELETE /usuarios`
+- `GET, POST /carrinhos`
+- `DELETE /carrinhos/concluir-compra`
+- `DELETE /carrinhos/cancelar-compra`
+- `POST /produtos`
 
-Gerenciamento de usuários do sistema (inclusive administradores).
-
-| Método | Caminho            | Descrição                     |
-|--------|--------------------|-------------------------------|
-| GET    | `/usuarios`        | Listar usuários cadastrados   |
-| POST   | `/usuarios`        | Cadastrar novo usuário        |
-| GET    | `/usuarios/{_id}`  | Buscar usuário por ID         |
-| PUT    | `/usuarios/{_id}`  | Editar usuário existente      |
-| DELETE | `/usuarios/{_id}`  | Excluir usuário por ID        |
-
-Observações gerais:
-
-- Alguns cenários exigem usuário **administrador** (ver campo `administrador` no cadastro e o Swagger para regras exatas).
-- Erros comuns: e-mail já utilizado, usuário com carrinho ativo que não pode ser excluído etc.
+> Observação: `POST /produtos` é exercitado em cenários de autorização/autenticação e apoio a fluxos de carrinho.
 
 ---
 
-## Carrinhos
+## Mapeamento por suíte
 
-Permite criar e gerenciar carrinhos de compras vinculados a um usuário.
+## 1) Login
 
-| Método | Caminho                          | Descrição                                      |
-|--------|-----------------------------------|------------------------------------------------|
-| GET    | `/carrinhos`                      | Listar carrinhos cadastrados                   |
-| POST   | `/carrinhos`                      | Cadastrar novo carrinho                        |
-| GET    | `/carrinhos/{_id}`                | Buscar carrinho por ID                         |
-| DELETE | `/carrinhos/concluir-compra`      | Concluir compra (remove carrinho)              |
-| DELETE | `/carrinhos/cancelar-compra`      | Cancelar compra e devolver produtos ao estoque |
+Arquivo: `src/test/java/restassured_serverest/login/LoginFeatureTests.java`
 
-Observações gerais:
-
-- É necessário estar autenticado para criar carrinho para um usuário.
-- Conclusão e cancelamento de compra têm regras específicas de negócio (ver Swagger para detalhes de mensagens e códigos de resposta).
+| CT | Cenário | Endpoint(s) principal(is) |
+|---|---|---|
+| CT01 | Login com credenciais válidas e token | `POST /usuarios`, `POST /login` |
+| CT02 | Login com credenciais inválidas | `POST /login` |
+| CT03 | Campos obrigatórios no login | `POST /login` |
+| CT04 | Login + tentativa de acesso a rota exclusiva de admin | `POST /usuarios`, `POST /login`, `POST /produtos` |
+| CT05 | Formato inválido de e-mail no login | `POST /login` |
 
 ---
 
-## Schemas e exemplos de payloads
+## 2) Usuários
 
-O Swagger oficial descreve os principais schemas utilizados, por exemplo:
+Arquivo: `src/test/java/restassured_serverest/usuarios/UsersFeatureTests.java`
 
-- `requestBodyUsuarios` – estrutura para cadastro/edição de usuários.
-- `requestBodyLogin` – corpo de login.
-- `requestBodyProduto` – estrutura de cadastro/edição de produtos.
-- `requestBodyCarrinho` – estrutura de criação de carrinho.
+| CT | Cenário | Endpoint(s) principal(is) |
+|---|---|---|
+| CT01 | Criação de usuário padrão | `POST /usuarios`, `GET /usuarios/{id}` |
+| CT02 | Criação de usuário administrador | `POST /usuarios`, `GET /usuarios/{id}` |
+| CT03 | Listagem e estrutura de usuários | `GET /usuarios` |
+| CT04 | Busca usuário por ID | `GET /usuarios`, `GET /usuarios/{id}` |
+| CT05 | Atualização de usuário admin | `POST /usuarios`, `PUT /usuarios/{id}`, `GET /usuarios/{id}` |
+| CT06 | Atualização de usuário padrão | `POST /usuarios`, `PUT /usuarios/{id}`, `GET /usuarios/{id}` |
+| CT07 | Exclusão de usuário admin | `POST /usuarios`, `DELETE /usuarios/{id}`, `GET /usuarios/{id}` |
+| CT08 | Exclusão de usuário padrão | `POST /usuarios`, `DELETE /usuarios/{id}`, `GET /usuarios/{id}` |
+| CT09 | Bloqueio de e-mail duplicado | `POST /usuarios` |
+| CT10 | Validações avançadas com filtros | `GET /usuarios` |
+| CT11 | Validações condicionais | `GET /usuarios` |
+| CT12 | Ausência de campos não mapeados | `GET /usuarios` |
+| CT13 | Preparação de dados para validação de cadastro | `POST /usuarios` |
+| CT14 | Impedir exclusão de usuário com carrinho associado | `POST /usuarios`, `POST /login`, `POST /produtos`, `DELETE /carrinhos/cancelar-compra`, `POST /carrinhos`, `DELETE /usuarios/{id}` |
+| CT15 | Buscar usuário com ID inválido | `GET /usuarios/{id}` |
+| CT16 | Impedir atualização com e-mail duplicado | `POST /usuarios`, `PUT /usuarios/{id}` |
+| CT17 | Campos obrigatórios no cadastro (parametrizado) | `POST /usuarios` |
+| CT18 | Validação de contrato JSON Schema do usuário por ID | `POST /usuarios`, `GET /usuarios/{id}` |
 
-Para montar os cenários de teste automatizado (Karate), utilize os exemplos de request/response diretamente do Swagger em https://serverest.dev/?lang=pt-BR.
+### Contrato (Schema)
+
+- Arquivo de schema: `src/test/resources/schemas/usuarios/user-by-id-schema.json`
+- Matcher usado: `matchesJsonSchemaInClasspath(...)`
 
 ---
 
-## Testes automatizados (Karate)
+## 3) Carrinhos
 
-Os testes deste projeto são escritos em **Karate** e estão localizados em `src/test/java`. As suítes principais validam autenticação, usuários, produtos e carrinhos da API ServeRest.
+Arquivo: `src/test/java/restassured_serverest/carrinhos/CartsFeatureTests.java`
 
-### Visão geral das suítes
+| CT | Cenário | Endpoint(s) principal(is) |
+|---|---|---|
+| CT01 | Ciclo completo do carrinho (criar, buscar, concluir compra) | `POST /usuarios`, `POST /login`, `DELETE /carrinhos/cancelar-compra`, `POST /produtos`, `POST /carrinhos`, `GET /carrinhos/{id}`, `DELETE /carrinhos/concluir-compra` |
+| CT02 | Cancelar compra e devolver estoque | `POST /usuarios`, `POST /login`, `DELETE /carrinhos/cancelar-compra`, `POST /produtos`, `POST /carrinhos`, `DELETE /carrinhos/cancelar-compra` |
+| CT03 | Bloquear criação de carrinho sem token | `POST /carrinhos` |
+| CT04 | Impedir mais de um carrinho por usuário | `POST /usuarios`, `POST /login`, `DELETE /carrinhos/cancelar-compra`, `POST /produtos`, `POST /carrinhos` |
+| CT05 | Carrinho não encontrado por ID inválido | `GET /carrinhos/{id}` |
+| CT06 | Impedir carrinho com estoque insuficiente | `POST /usuarios`, `POST /login`, `DELETE /carrinhos/cancelar-compra`, `POST /produtos`, `POST /carrinhos` |
+| CT07 | Impedir carrinho com produto duplicado | `POST /usuarios`, `POST /login`, `DELETE /carrinhos/cancelar-compra`, `POST /produtos`, `POST /carrinhos` |
 
-| Suíte / Funcionalidade | Arquivo                                   | Qtde. de cenários | Criticidade média da suíte | Tags principais                    |
-|------------------------|-------------------------------------------|-------------------|---------------------------|------------------------------------|
-| Login                  | `serverest/login/Login.feature`           | 5                 | Alta                      | `@login`, `@smoke`, `@regression`  |
-| Usuários               | `serverest/usuarios/Users.feature`        | 14                | Alta                      | `@users`, `@smoke`, `@regression`  |
-| Produtos               | `serverest/produtos/Products.feature`     | 13                | Alta                      | `@products`, `@smoke`, `@regression` |
-| Carrinhos              | `serverest/carrinhos/Carts.feature`       | 8                 | Alta                      | `@carts`, `@regression`            |
+---
 
-Total de cenários automatizados: **40** (5 Login + 14 Usuários + 13 Produtos + 8 Carrinhos).
+## 4) Carga / NFR
 
-> As tags `@smoke` identificam cenários de verificação rápida (happy path). A tag `@regression` cobre a bateria completa de testes funcionais e de validação. A criticidade considera impacto no fluxo principal de uso da API (autenticação, CRUD de usuários e produtos).
+Arquivo: `src/test/java/restassured_serverest/performance/RateLimitLoadTests.java`
 
-### Login – autenticação de usuários
+| Cenário | Objetivo | Configuração atual |
+|---|---|---|
+| `shouldSupport100RequestsPerSecondWithoutServerErrors` | Simular carga em `/usuarios` e garantir ausência de erro 5xx | `throughputTimer(100)` por `Duration.ofSeconds(10)` |
 
-Arquivo: `src/test/java/serverest/login/Login.feature`
+Detalhes:
 
-- **CT01 – Login válido e validação de token**  
-	- Tags: `@regression @smoke @login-success`  
-	- Tipo: teste positivo, smoke, autenticação básica com geração de token JWT.  
-	- Criticidade: **Alta** (login bem-sucedido é o fluxo principal de autenticação).
-- **CT02 – Login com credenciais inválidas**  
-	- Tags: `@regression`  
-	- Tipo: teste negativo, valida mensagem de erro e ausência de token.  
-	- Criticidade: **Alta** (garante segurança ao rejeitar credenciais inválidas).
-- **CT03 – Campos obrigatórios de login (Scenario Outline)**  
-	- Tags: `@regression`  
-	- Tipo: validação de obrigatoriedade de `email` e `password` (combinações faltantes, status 400).  
-	- Criticidade: **Média** (regras de validação importantes, porém complementares ao fluxo principal).
-- **CT04 – Login e acesso a recurso protegido**  
-	- Tags: `@regression`  
-	- Tipo: integração login + produtos; usa o token para criar um produto autenticado.  
-	- Criticidade: **Alta** (valida fim a fim autenticação + autorização em rota protegida).
-- **CT05 – Formato inválido de e-mail no login (Scenario Outline)**  
-	- Tags: `@regression`  
-	- Tipo: teste negativo de validação de formato de e-mail.  
-	- Criticidade: **Média** (melhora robustez de validação de entrada).
+- Cenário marcado com `@Disabled` por padrão (execução manual).
+- Critério atual: **falha apenas se houver HTTP 5xx**.
+- `429` pode ocorrer ou não dependendo da política do ambiente.
+- Logs gerados:
+  - JTL: `target/jmeter-jtls/rate-limit/*.jtl`
+  - Resumo: `target/jmeter-jtls/rate-limit/analysis.log`
 
-### Usuários – gestão de usuários
+---
 
-Arquivo: `src/test/java/serverest/usuarios/Users.feature`
+## Convenções adotadas
 
-- **CT01 – Listar usuários e validar estrutura JSON**  
-	- Tags: `@list @smoke @regression`  
-	- Tipo: teste positivo/smoke de listagem, com validações estruturais e de conteúdo (quantidade, formato de e-mail, campos obrigatórios).  
-	- Criticidade: **Alta** (visualização de usuários e contrato da resposta).
-- **CT02 – Buscar usuário específico por ID**  
-	- Tags: `@get-by-id @regression`  
-	- Tipo: teste positivo de consulta por ID, validando campos retornados.  
-	- Criticidade: **Alta** (consulta direta por ID é core do CRUD).
-- **CT03 – Criar novo usuário com validações completas**  
-	- Tags: `@create @smoke @regression`  
-	- Tipo: teste positivo/smoke de criação, seguido de consulta para garantir persistência.  
-	- Criticidade: **Alta** (criação de usuário é fluxo crítico da API).
-- **CT04 – Validações avançadas com filtros JSON**  
-	- Tags: `@advanced-validations @regression`  
-	- Tipo: regressão focada em filtros (admins, jsonPath, listas de e-mails).  
-	- Criticidade: **Média** (validações avançadas de resposta e filtros).
-- **CT05 – Erro ao criar usuário com e-mail duplicado**  
-	- Tags: `@error-validation @regression`  
-	- Tipo: teste negativo de regra de unicidade de e-mail.  
-	- Criticidade: **Alta** (evita inconsistências por duplicidade de e-mail).
-- **CT06 – Fuzzy matching para usuários administradores**  
-	- Tags: `@fuzzy-validation @regression`  
-	- Tipo: validação de usuários com `administrador = true` usando fuzzy matching.  
-	- Criticidade: **Média** (garante consistência dos dados de administradores).
-- **CT07 – Validações condicionais**  
-	- Tags: `@conditional-validation @regression`  
-	- Tipo: regressão com validações condicionais com base no campo `administrador`.  
-	- Criticidade: **Média** (auxilia no reforço de regras de negócio por perfil).
-- **CT08 – Validação com expressões regulares**  
-	- Tags: `@regex-validation @regression`  
-	- Tipo: validação de formato de e-mail, nome e `_id` usando regex.  
-	- Criticidade: **Média** (foco em qualidade de dados e formato).
-- **CT09 – Garantir ausência de campos indesejados**  
-	- Tags: `@negative-validation @regression`  
-	- Tipo: teste negativo que assegura que campos como `error`, `cpf`, `phone` não estejam presentes.  
-	- Criticidade: **Baixa/Média** (assegura limpeza de contrato, menor impacto funcional direto).
-- **CT10 – Uso de variáveis para validações dinâmicas**  
-	- Tags: `@variable-validation @regression`  
-	- Tipo: criação e consulta por e-mail dinâmico, garantindo consistência dos dados.  
-	- Criticidade: **Média** (reafirma o fluxo de criação + consulta com dados dinâmicos).
-- **CT11 – Validação de resposta em criação complexa**  
-	- Tags: `@nested-json-validation @regression`  
-	- Tipo: criação de usuário com dados "complexos" e validação detalhada da resposta.  
-	- Criticidade: **Média** (aprofundamento nas validações de criação).
-- **CT12 – Criação de usuário a partir de JSON fixo**  
-	- Tags: `@create-from-json @regression`  
-	- Tipo: criação baseada em payload fixo (`userPayload.json`), com ajuste de e-mail para evitar duplicidade.  
-	- Criticidade: **Média** (garante que payloads fixos usados em testes funcionem corretamente).
-- **CT13 – Criar e excluir usuário baseado em payload JSON**  
-	- Tags: `@create-and-delete @regression`  
-	- Tipo: fluxo completo de criação, exclusão e verificação de inexistência posterior.  
-	- Criticidade: **Alta** (fluxo completo de ciclo de vida do usuário).
+- Identificação de cenário via `@DisplayName("CTxx - ...")`.
+- Execução paralela nas suítes funcionais (`ExecutionMode.CONCURRENT`).
+- Execução em thread única para carga (`ExecutionMode.SAME_THREAD`).
+- Payloads preferencialmente tipados com `Map`/`List`.
 
-- **CT14 – Impedir exclusão de usuário com carrinho cadastrado**  
-	- Tags: `@delete-with-cart @regression`  
-	- Tipo: teste negativo de regra de negócio que impede excluir usuário que possui carrinho associado.  
-	- Criticidade: **Alta** (previne perda de vínculo entre usuário e carrinho ativo).
+---
 
-### Carrinhos – gestão de carrinhos
+## Observações de manutenção
 
-Arquivo: `src/test/java/serverest/carrinhos/Carts.feature`
+Se houver inclusão, remoção ou renomeação de cenários, este arquivo deve ser atualizado em conjunto com:
 
-- **CT01 – Ciclo completo de carrinho para usuário autenticado**  
-	- Tags: `@carts @regression`  
-	- Tipo: fluxo fim a fim que cria produto, cria carrinho, busca por ID e conclui compra.  
-	- Criticidade: **Alta** (fluxo principal de compra da API).
-- **CT02 – Cancelar compra e retornar produtos ao estoque**  
-	- Tags: `@carts @regression`  
-	- Tipo: fluxo de cancelamento de compra com remoção de carrinho e reabastecimento implícito de estoque.  
-	- Criticidade: **Alta** (controle correto do ciclo de vida do carrinho e do estoque).
-- **CT03 – Impedir criação de carrinho sem token**  
-	- Tags: `@carts @regression`  
-	- Tipo: teste negativo de autenticação em `/carrinhos` (401 com mensagem de token ausente/inválido/expirado).  
-	- Criticidade: **Alta** (garante que apenas usuários autenticados possam criar carrinho).
-- **CT04 – Impedir mais de um carrinho por usuário**  
-	- Tags: `@carts @regression`  
-	- Tipo: teste negativo de regra de negócio que restringe um único carrinho por usuário.  
-	- Criticidade: **Alta** (evita estados inconsistentes de múltiplos carrinhos por usuário).
-- **CT05 – Carrinho não encontrado por ID**  
-	- Tags: `@carts @regression`  
-	- Tipo: teste negativo de consulta com ID inválido, validando mensagem de erro sobre o formato/quantidade de caracteres do ID (16 caracteres alfanuméricos).  
-	- Criticidade: **Média** (tratamento de erro de validação de identificador).
-- **CT06 – Impedir criação de carrinho com estoque insuficiente**  
-	- Tags: `@carts @regression`  
-	- Tipo: teste negativo que tenta adicionar ao carrinho quantidade maior que o estoque disponível, validando mensagem de erro.  
-	- Criticidade: **Alta** (protege consistência de estoque e regras de venda).
-- **CT07 – Impedir carrinho com produtos duplicados**  
-	- Tags: `@carts @regression`  
-	- Tipo: teste negativo que tenta criar um carrinho contendo o mesmo produto repetido mais de uma vez na lista, esperando mensagem de erro sobre produto duplicado.  
-	- Criticidade: **Alta** (evita inconsistências na composição do carrinho e duplicidade de itens).
-- **CT08 – Impedir criação de carrinho com produto inexistente**  
-	- Tags: `@carts @regression`  
-	- Tipo: teste negativo que tenta criar carrinho com um `idProduto` inexistente, validando mensagem de "Produto não encontrado".  
-	- Criticidade: **Alta** (garante que apenas produtos válidos sejam associados a carrinhos).
-
-### Classificação geral dos testes
-
-- **Smoke tests**: subset mínimo para checagem rápida da API (`Login CT01`, `Usuários CT01 e CT03`, `Produtos CT01 e CT02`).  
-- **Testes de regressão funcionais**: toda a bateria marcada com `@regression`, cobrindo fluxos de CRUD, autenticação, filtros e validações de contrato.  
-- **Testes positivos (happy path)**: criação, listagem, consulta, atualização e fluxo de compra bem-sucedidos (por exemplo, CT01/CT03 de Usuários, CT01/CT02/CT05 de Produtos, CT01/CT04 de Login, CT01/CT02 de Carrinhos).  
-- **Testes negativos/validação de regras**: credenciais inválidas, campos obrigatórios, formato de e-mail, e-mail duplicado, nome de produto duplicado, criação sem token, valores inválidos, regras de carrinho e autorização de administrador (cenários CT02/CT03/CT05 de Login, CT05/CT14 de Usuários, CT03/CT07/CT08/CT12/CT13 de Produtos, CT03/CT04/CT05/CT06 de Carrinhos).
-
-
+- `README.md` (resumo e contagem)
+- classes de teste (`login`, `usuarios`, `carrinhos`, `performance`)
+- artefatos de contrato (`schemas/**`) quando aplicável

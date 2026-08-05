@@ -5,13 +5,50 @@
 [![Java](https://img.shields.io/badge/Java-23-orange.svg)](https://www.oracle.com/java/)
 [![PMD](https://img.shields.io/badge/PMD-7.7.0-brightgreen.svg)](https://pmd.github.io/)
 
-Projeto de automação de testes de API utilizando **Rest Assured** e **Java 23** para validar a API REST **ServeRest** — uma plataforma que simula os serviços de um e-commerce.
+- Projeto de automação de testes de API utilizando **Rest Assured 6.0.0** e **Java 23** para validar a API REST **ServeRest** — uma plataforma que simula os serviços de um e-commerce.
 
-Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), relatórios interativos com **Allure Report**, análise estática via **PMD 7** e esteira de CI/CD via **GitHub Actions**.
+- Estruturado com boas práticas de engenharia de software (Clean Code, SOLID).
+- Relatórios interativos com o **Allure Report**, análise estática de código com **PMD 7** e integração com **GitHub Actions** e relatórios no **GitHub Pages**.
+
+
+O projeto também inclui:
+- ✅ **Validação de contrato JSON Schema** com Rest Assured (`json-schema-validator`)
+- ✅ **Teste de carga com JMeter Java DSL** para cenários de limitação de taxa
+- ✅ **Logs de execução de carga** em `.jtl` e arquivo de análise (`analysis.log`)
+
+## 📌 Resumo Inicial
+
+### Endpoints testados
+
+- `POST /login`
+- `GET, POST, PUT, DELETE /usuarios`
+- `GET, POST, DELETE /carrinhos`
+- `DELETE /carrinhos/cancelar-compra`
+- `POST /produtos`
+
+### Quantidade de testes automatizados (estado atual)
+
+- **30 cenários funcionais** (catalogados com `CTxx`):
+    - `LoginFeatureTests`: **5**
+    - `UsersFeatureTests`: **18**
+    - `CartsFeatureTests`: **7**
+- **1 cenário de carga/NFR**:
+    - `RateLimitLoadTests`: **1** (execução manual)
+- **Total:** **31 cenários automatizados**
+
+**Obs:** No Relatório o total de testes é exibido como **38**, pois alguns cenários possuem **testes parametrizados** (ex.: CT05 - Login com e-mails inválidos).
+
+Para rodar os testes (Observação precisa do Java JDK 23+ e Maven 3.6+):
+````bash
+mvn clean test
+````
 
 - **Repositório**: [https://github.com/reinaldorossetti/serverest_restassured_java](https://github.com/reinaldorossetti/serverest_restassured_java)
+
 - **Relatório no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/)
+
 - **Mapeamento de Testes**: [TESTING_API.MD](TESTING_API.MD)
+
 - **Requisitos do Projeto**: [Requisitos.md](Requisitos.md)
 
 ---
@@ -28,6 +65,7 @@ Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), re
 - [Análise Estática de Código (PMD)](#-análise-estática-de-código-pmd)
 - [Esteira CI/CD - GitHub Actions](#-esteira-cicd---github-actions)
 - [Exemplos de Testes](#-exemplos-de-testes)
+- [Teste de Carga (JMeter DSL)](#-teste-de-carga-jmeter-dsl)
 - [Relatórios Allure](#-relatórios-allure)
 - [Boas Práticas](#-boas-práticas)
 
@@ -116,6 +154,8 @@ serverest_restassured_java/
 │       ├── java/
 │       │   └── restassured_serverest/
 │       │       ├── BaseApiTest.java               # Configurações base (BaseURI, RequestSpecs, Filtro Allure)
+│       │       ├── performance/
+│       │       │   └── RateLimitLoadTests.java    # Teste de carga com JMeter DSL + geração de log de análise
 │       │       ├── login/
 │       │       │   └── LoginFeatureTests.java     # Suíte de testes do recurso Login
 │       │       ├── carrinhos/
@@ -126,6 +166,9 @@ serverest_restassured_java/
 │       │           └── FakerUtils.java            # Utilitário para geração de dados dinâmicos
 │       │
 │       └── resources/
+│           ├── schemas/
+│           │   └── usuarios/
+│           │       └── user-by-id-schema.json     # Schema JSON para validação de contrato de usuário
 │           └── restassured/
 │               └── login/
 │                   └── invalid-login-emails.csv   # Massa de dados para teste parametrizado
@@ -155,8 +198,10 @@ serverest_restassured_java/
 |------------|------------------|--------|
 | **Java** | `compiler.source / target` | `23` |
 | **Rest Assured** | `io.rest-assured:rest-assured` | `6.0.0` |
+| **Rest Assured JSON Schema** | `io.rest-assured:json-schema-validator` | `6.0.0` |
 | **JUnit 5** | `org.junit.jupiter:junit-jupiter-api` | `5.10.1` |
 | **JUnit Platform** | `org.junit.platform:junit-platform-suite-api` | `1.10.1` |
+| **JMeter Java DSL** | `us.abstracta.jmeter:jmeter-java-dsl` | `2.2` |
 | **Allure Rest Assured** | `io.qameta.allure:allure-rest-assured` | `2.17.0` |
 | **Allure JUnit 5** | `io.qameta.allure:allure-junit5` | `2.17.0` |
 | **Java Faker** | `com.github.javafaker:javafaker` | `1.0.2` |
@@ -173,6 +218,7 @@ cd serverest_restassured_java
 ```
 
 ### 2. Executar todos os testes
+Localmente roda sem docker, mas a pipeline sobe o ServeRest local via Docker Compose antes da execução.
 ```bash
 mvn clean test
 ```
@@ -324,6 +370,39 @@ void validateInvalidEmailFormat(String invalidEmail) {
 }
 ```
 
+### Exemplo 4: Validação de JSON Schema (`UsersFeatureTests`)
+
+```java
+givenWithAllure()
+    .basePath(ROTA_USUARIOS + "/" + userId)
+    .when()
+    .get()
+    .then()
+    .statusCode(200)
+    .body(matchesJsonSchemaInClasspath("schemas/usuarios/user-by-id-schema.json"));
+```
+
+---
+
+## ⚡ Teste de Carga (JMeter DSL)
+
+O projeto possui o teste `RateLimitLoadTests` para simulação de carga no endpoint `/usuarios`.
+
+### Como executar manualmente
+
+> O teste está marcado com `@Disabled` por padrão (NFR), então execute com a condição desativada no JUnit:
+
+```bash
+mvn "-Dtest=restassured_serverest.performance.RateLimitLoadTests" "-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition" test
+```
+
+### Artefatos de log gerados
+
+- **JTL de amostras**: `target/jmeter-jtls/rate-limit/*.jtl`
+- **Resumo de análise**: `target/jmeter-jtls/rate-limit/analysis.log`
+
+O `analysis.log` inclui timestamp, arquivo JTL utilizado, total de amostras, contagem de `429`, contagem de `5xx` e distribuição de códigos HTTP.
+
 ---
 
 ## 📊 Relatórios Allure
@@ -348,8 +427,11 @@ O relatório interativo exibe:
 3. **Padrão DRY (Don't Repeat Yourself)**: Reutilização de especificações na classe base [BaseApiTest.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/BaseApiTest.java).
 4. **Payloads tipados**: Uso de `Map`/`List` ao invés de JSON manual em `String`, reduzindo erros de serialização.
 5. **Respeito aos Princípios SOLID & Clean Code**: Métodos pequenos, tipagem estrita e nomes descritivos.
+6. **Validação de contrato**: Uso de JSON Schema para garantir conformidade estrutural das respostas.
+7. **Testes NFR isolados**: Carga executada manualmente via JMeter DSL, sem impactar a suíte funcional padrão.
+8. **Rastreabilidade de carga**: Persistência de logs (`.jtl` + `analysis.log`) para análise posterior.
 
-6. **Validações de API**: Seguindo as melhores práticas de validação de APIs REST, conforme detalhado neste artigo:
+9. **Validações de API**: Seguindo as melhores práticas de validação de APIs REST, conforme detalhado neste artigo:
 https://reiload-88128.medium.com/quais-validações-devo-realizar-em-uma-api-postman-ca99eeae81dd
 
 ---

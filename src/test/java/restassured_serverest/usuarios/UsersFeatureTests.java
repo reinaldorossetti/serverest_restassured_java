@@ -3,22 +3,12 @@ package restassured_serverest.usuarios;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.everyItem;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import io.qameta.allure.Allure;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import io.qameta.allure.*;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -51,7 +41,7 @@ public class UsersFeatureTests extends BaseApiTest {
         final String password = FakerUtils.randomPassword();
         final String administrador = "false";
 
-        final String body = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> body = bodyPayload(name, email, password, administrador);
 
         final Response createResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -89,7 +79,7 @@ public class UsersFeatureTests extends BaseApiTest {
         final String password = FakerUtils.randomPassword();
         final String administrador = "true";
 
-        final String body = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> body = bodyPayload(name, email, password, administrador);
 
         final Response createResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -182,7 +172,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String password = FakerUtils.randomPassword();
         final String administrador = "true";
 
-        final String body = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> body = bodyPayload(name, email, password, administrador);
 
         final Response createResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -201,7 +191,7 @@ public class UsersFeatureTests extends BaseApiTest {
         email = FakerUtils.randomEmail();
         name = FakerUtils.randomName();
         password = FakerUtils.randomPassword();
-        final String bodyUpdate = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> bodyUpdate = bodyPayload(name, email, password, administrador);
 
         final Response updateResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -240,7 +230,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String password = FakerUtils.randomPassword();
         final String administrador = "false";
 
-        final String body = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> body = bodyPayload(name, email, password, administrador);
 
         final Response createResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -259,7 +249,7 @@ public class UsersFeatureTests extends BaseApiTest {
         email = FakerUtils.randomEmail();
         name = FakerUtils.randomName();
         password = FakerUtils.randomPassword();
-        final String bodyUpdate = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> bodyUpdate = bodyPayload(name, email, password, administrador);
 
         final Response updateResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -297,7 +287,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String password = FakerUtils.randomPassword();
         final String administrador = "true";
 
-        final String body = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> body = bodyPayload(name, email, password, administrador);
 
         final Response createResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -316,7 +306,7 @@ public class UsersFeatureTests extends BaseApiTest {
         email = FakerUtils.randomEmail();
         name = FakerUtils.randomName();
         password = FakerUtils.randomPassword();
-        final String bodyUpdate = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> bodyUpdate = bodyPayload(name, email, password, administrador);
 
         final Response updateResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -351,7 +341,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String password = FakerUtils.randomPassword();
         final String administrador = "false";
 
-        final String body = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> body = bodyPayload(name, email, password, administrador);
 
         final Response createResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -370,7 +360,7 @@ public class UsersFeatureTests extends BaseApiTest {
         email = FakerUtils.randomEmail();
         name = FakerUtils.randomName();
         password = FakerUtils.randomPassword();
-        final String bodyUpdate = bodyPayload(name, email, password, administrador);
+        final Map<String, Object> bodyUpdate = bodyPayload(name, email, password, administrador);
 
         final Response updateResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -403,7 +393,7 @@ public class UsersFeatureTests extends BaseApiTest {
     @DisplayName("CT09 - Cenário Negativo - Validar mensagens de erro ao criar e-mail duplicado")
     void duplicateEmailValidation() {
         final String duplicateEmail = FakerUtils.randomEmail();
-        final String user1 = bodyEmail(duplicateEmail);
+        final Map<String, Object> user1 = bodyEmail(duplicateEmail);
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -414,7 +404,7 @@ public class UsersFeatureTests extends BaseApiTest {
                 .then()
                 .statusCode(201);
 
-        final String user2 = bodyEmail(duplicateEmail);
+        final Map<String, Object> user2 = bodyEmail(duplicateEmail);
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -549,12 +539,11 @@ public class UsersFeatureTests extends BaseApiTest {
     @DisplayName("CT14 - Cenário Negativo - Impedir exclusão de usuário que possui carrinho associado")
     void preventDeletingUserThatHasAssociatedCart() {
         final String userEmail = FakerUtils.randomEmail();
-        final String userPassword = "SenhaSegura@123";
 
         final Map<String, String> userData = Map.of(
                 "nome", "User With Cart",
                 "email", userEmail,
-                "password", userPassword,
+                "password", DEFAULT_PASSWORD,
                 "administrador", "true");
 
         final Response createUserResponse = givenWithAllure()
@@ -571,7 +560,7 @@ public class UsersFeatureTests extends BaseApiTest {
         final String userId = createUserResponse.path(KEY_ID);
 
         final String loginPayload = String.format("{\n  \"email\": \"%s\",\n  \"password\": \"%s\"\n}",
-                userEmail, userPassword);
+                userEmail, DEFAULT_PASSWORD);
 
         final Response loginResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -724,4 +713,36 @@ public class UsersFeatureTests extends BaseApiTest {
                 .statusCode(400)
                 .body(containsString(expectedField));
      }
+
+    @Test
+    @Order(18)
+    @Severity(SeverityLevel.CRITICAL)
+    @DisplayName("CT18 - Validar JSON Schema do GET /usuarios/{id}")
+    void validateUserByIdJsonSchema() {
+        final Map<String, Object> payload = bodyPayload(
+                FakerUtils.randomName(),
+                FakerUtils.randomEmail(),
+                FakerUtils.randomPassword(),
+                "false");
+
+        final Response createResponse = givenWithAllure()
+                .contentType(ContentType.JSON)
+                .basePath(ROTA_USUARIOS)
+                .body(payload)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract().response();
+
+        final String userId = createResponse.path(KEY_ID);
+
+        givenWithAllure()
+                .basePath(ROTA_USUARIOS + "/" + userId)
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("schemas/usuarios/user-by-id-schema.json"));
+    }
 }
