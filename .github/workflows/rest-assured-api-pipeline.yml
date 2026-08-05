@@ -66,8 +66,7 @@ jobs:
         with:
           name: allure-report
           path: |
-            target/allure-report
-            target/allure-report.pdf
+            target/allure-report/index.html
 
       - name: Encerrar ambiente Docker
         if: always()
