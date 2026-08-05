@@ -39,7 +39,6 @@ public class LoginFeatureTests extends BaseApiTest {
     @DisplayName("CT01 - Realizar login com credenciais válidas e validar token")
     void loginWithValidCredentials() {
         final String email = FakerUtils.randomEmail();
-        final String password = "SenhaSegura@123";
 
         createUser(email, password, false)
                 .then()
@@ -115,7 +114,6 @@ public class LoginFeatureTests extends BaseApiTest {
     @Test
     @DisplayName("CT04 - Login e uso do token para acessar recurso protegido")
     void loginAndUseTokenInProtectedRoute() {
-        // Cria usuário comum (não administrador)
         final String userEmail = FakerUtils.randomEmail();
         final String userPassword = "SenhaSegura@123";
 
@@ -123,7 +121,6 @@ public class LoginFeatureTests extends BaseApiTest {
                 .then()
                 .statusCode(201);
 
-        // Faz login com usuário comum
         final Response loginResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
                 .basePath(ROTA_LOGIN)

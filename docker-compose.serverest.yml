@@ -1,0 +1,7 @@
+services:
+  serverest:
+    image: paulogoncalvesbh/serverest:3.2.1
+    container_name: serverest-local
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

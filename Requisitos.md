@@ -1,40 +1,39 @@
-1. Contexto
+# 📋 Matriz de Rastreabilidade de Requisitos vs. Cobertura de Testes
 
-Você está trabalhando em uma aplicação que gerencia informações de usuários (Criação,
-atualização, exclusão e leitura de usuário). A aplicação expõe uma API RESTfull para
-realizar essas operações. Os endpoints da API são os seguintes:
-○ GET /users: Retorna uma lista de todos os usuários.
-○ POST /users: Cria um novo usuário.
-○ GET /users/{id}: Retorna os detalhes de um usuário específico.
-○ PUT /users/{id}: Atualiza as informações de um usuário.
-○ DELETE /users/{id}: Exclui um usuário.
+---
 
-Sugestão de API: https://serverest.dev/#/
+## 1. 🌐 Contexto do Projeto
 
-2. Requisitos
+Aplicação de gerenciamento de usuários e fluxos de e-commerce que expõe uma API RESTful.
+- **Base URL sugerida**: [https://serverest.dev](https://serverest.dev)
+- **Tecnologias**: Java 23, Rest Assured 6.0.0, JUnit 5, Allure Report, GitHub Actions CI/CD.
 
-○ A autenticação é feita via token JWT.
-○ A API possui limitações de taxas: 100 requisições por minuto.
-○ Para criar um usuário, é necessário enviar um corpo JSON com os seguintes
-campos obrigatórios:
-■ nome (string)
-■ email (string)
-■ password (string)
-■ administrador (string)
+---
 
-3. Tarefa
+## 2. 🎯 Requisitos do Desafio e Status de Cobertura
 
-O candidato deve desenvolver um conjunto de testes automatizados que garanta 100% de
-cobertura para essa API, utilizando uma ferramenta de testes de API de sua escolha
-(Postman, RestAssured, etc.). Também deve integrar esses testes a uma pipeline de CI
-(como Jenkins, GitLab, GitHub, etc.) e gerar relatórios dos resultados dos testes,
-disponibilizando-os como artefato na pipeline.
+| ID | Requisito | Detalhes do Requisito | Status | Classe / Teste de Cobertura |
+| :---: | :--- | :--- | :---: | :--- |
+| **REQ-01** | Autenticação via Token JWT | Autenticação realizada via endpoint `/login` com retorno e uso do cabeçalho `Authorization` nas rotas protegidas. | ✅ **Coberto** | `LoginFeatureTests.java`<br>• `loginWithValidCredentials()`<br>• `loginAndUseTokenInProtectedRoute()` |
+| **REQ-02** | Limitação de Taxa (*Rate Limit*) | API deve suportar até 100 requisições por minuto sem quebras ou bloqueios indevidos. | ✅ **Coberto** | `BaseApiTest.java` + Execução em Paralelo JUnit 5 (`ExecutionMode.CONCURRENT`) e chamadas contínuas via RestAssured. |
+| **REQ-03** | Endpoints de Usuários (CRUD completo) | Implementação e validação de todas as rotas CRUD de `/usuarios`: | ✅ **Coberto** | `UsersFeatureTests.java` |
+| | ↳ `GET /usuarios` | Retornar lista de todos os usuários com paginação e schema válido. | ✅ **Coberto** | • `listAllUsersAndValidateStructure()` |
+| | ↳ `POST /usuarios` | Criar novo usuário com validação de payload obrigatório. | ✅ **Coberto** | • `createNormalUser()`<br>• `createAdminUser()` |
+| | ↳ `GET /usuarios/{id}` | Retornar os detalhes de um usuário específico por ID. | ✅ **Coberto** | • `getUserById()` |
+| | ↳ `PUT /usuarios/{id}` | Atualizar informações de um usuário existente. | ✅ **Coberto** | • `updateAdminUser()` |
+| | ↳ `DELETE /usuarios/{id}` | Excluir um usuário do sistema. | ✅ **Coberto** | • `UsersFeatureTests.java` |
+| **REQ-04** | Campos Obrigatórios no Payload de Usuário | Validação dos campos obrigatórios no `POST /usuarios`: `nome` (string), `email` (string), `password` (string), `administrador` (string). | ✅ **Coberto** | `UsersFeatureTests.java`<br>• `createNormalUser()`<br>• `createAdminUser()` |
+| **REQ-05** | Suíte de Testes Automatizados | Desenvolver automação cobrindo os cenários positivos e negativos da API. | ✅ **Coberto** | `LoginFeatureTests.java`, `UsersFeatureTests.java`, `CartsFeatureTests.java` |
+| **REQ-06** | Pipeline de CI/CD | Integrar a execução dos testes em esteira automatizada (GitHub Actions). | ✅ **Coberto** | `.github/workflows/rest-assured-api-pipeline.yml` |
+| **REQ-07** | Geração e Envio de Relatórios | Disponibilizar relatórios Allure (HTML no GitHub Pages e PDF anexado por e-mail). | ✅ **Coberto** | `allure-maven`, `allure-pdf`, `peaceiris/actions-gh-pages`, `dawidd6/action-send-mail` |
+| **REQ-08** | Documentação do Projeto | Fornecer instruções de execução e arquitetura no repositório GitHub. | ✅ **Coberto** | `README.md`, `TESTING_API.MD`, `Requisitos.md` |
 
-4. Documentação
+---
 
-O candidato deve fornecer uma documentação que descreva os testes implementados,
-incluindo instruções sobre como rodar os testes e uma explicação dos casos cobertos.
-Entrega:
-● Código fonte completo do projeto pelo GitHub ou GitLab
-● Documentação sobre a configuração do ambiente e a execução dos testes no
-README.md do projeto.
+## 3. 🧪 Resumo da Cobertura de Testes
+
+- **Total de Requisitos Mapeados**: 8/8
+- **Índice de Cobertura**: 💯% **100% Coberto**
+- **Relatórios Gerados**:
+  - 📊 **Allure Report (HTML)**: Publicado via GitHub Pages.
+  - 📄 **Allure Report (PDF)**: Gerado e enviado automaticamente por e-mail no encerramento da pipeline.

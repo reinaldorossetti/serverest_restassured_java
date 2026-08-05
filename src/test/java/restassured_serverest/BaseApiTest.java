@@ -1,12 +1,14 @@
 package restassured_serverest;
 
 import org.junit.jupiter.api.BeforeAll;
-
+import org.junit.jupiter.params.provider.Arguments;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import restassured_serverest.utils.FakerUtils;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
 
 public abstract class BaseApiTest {
 
@@ -22,6 +24,19 @@ public abstract class BaseApiTest {
     public static final String KEY_NOME = "nome";
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_ADMINISTRADOR = "administrador";
+    public static final String password = "SenhaSegura@123";
+
+    public static Stream<Arguments> invalidRequiredFieldsPayloads() {
+            return Stream.of(
+                        Arguments.of("nome ausente", "{\n  \"email\": \"required.nome.absent@test.com\",\n  \"password\": \"Senha123@\",\n  \"administrador\": \"false\"\n}", "nome"),
+                        Arguments.of("email ausente", "{\n  \"nome\": \"Usuário sem email\",\n  \"password\": \"Senha123@\",\n  \"administrador\": \"false\"\n}", "email"),
+                        Arguments.of("password ausente", "{\n  \"nome\": \"Usuário sem password\",\n  \"email\": \"required.password.absent@test.com\",\n  \"administrador\": \"false\"\n}", "password"),
+                        Arguments.of("administrador ausente", "{\n  \"nome\": \"Usuário sem admin\",\n  \"email\": \"required.admin.absent@test.com\",\n  \"password\": \"Senha123@\"\n}", "administrador"),
+                        Arguments.of("nome vazio", "{\n  \"nome\": \"\",\n  \"email\": \"required.nome.empty@test.com\",\n  \"password\": \"Senha123@\",\n  \"administrador\": \"false\"\n}", "nome"),
+                        Arguments.of("email vazio", "{\n  \"nome\": \"Usuário email vazio\",\n  \"email\": \"\",\n  \"password\": \"Senha123@\",\n  \"administrador\": \"false\"\n}", "email"),
+                        Arguments.of("password vazio", "{\n  \"nome\": \"Usuário password vazio\",\n  \"email\": \"required.password.empty@test.com\",\n  \"password\": \"\",\n  \"administrador\": \"false\"\n}", "password"),
+                        Arguments.of("administrador vazio", "{\n  \"nome\": \"Usuário admin vazio\",\n  \"email\": \"required.admin.empty@test.com\",\n  \"password\": \"Senha123@\",\n  \"administrador\": \"\"\n}", "administrador"));
+    }
 
     static Dotenv dotenv = Dotenv.configure()
         .directory("./.env")
@@ -62,6 +77,6 @@ public abstract class BaseApiTest {
 
     @BeforeAll
     static void setupRestAssured() {
-        RestAssured.baseURI = dotenv.get("BASE_URL");
+        RestAssured.baseURI = dotenv.get("BASE_URL_PROD");
     }
 }

@@ -20,6 +20,7 @@ Estruturado com boas práticas de engenharia de software (Clean Code, SOLID), re
 
 - [Sobre o Rest Assured](#-sobre-o-rest-assured)
 - [Sobre a API ServeRest](#-sobre-a-api-serverest)
+- [Docker](#-docker)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Pré-requisitos](#-pré-requisitos)
 - [Dependências do Projeto (pom.xml)](#-dependências-do-projeto-pomxml)
@@ -64,6 +65,38 @@ Ela oferece uma DSL (Domain Specific Language) fluente baseada no padrão BDD `g
 ```
 https://serverest.dev
 ```
+---
+
+## 🐳 Docker
+
+Este projeto possui suporte para execução local da API ServeRest com Docker e também integração na esteira CI.
+
+### Execução local com Docker Compose
+
+Subir o ambiente:
+
+```bash
+docker compose up -d
+```
+
+Validar se a API está no ar:
+
+```bash
+http://localhost:3000
+http://localhost:3000/status
+```
+
+Encerrar o ambiente:
+
+```bash
+docker compose down
+```
+
+> A URL usada pelos testes é controlada por `BASE_URL` no arquivo `.env`.
+
+### Docker na pipeline (GitHub Actions)
+
+Na esteira, o ambiente também sobe via Docker (`docker compose up -d`) antes da execução dos testes para garantir previsibilidade e independência de ambientes externos.
 
 ---
 
@@ -104,6 +137,7 @@ serverest_restassured_java/
 
 - **Java JDK 23**
 - **Maven 3.8+** (ou o Maven Wrapper `./mvnw` incluso)
+- **Docker Desktop** (opcional para rodar o ServeRest localmente)
 - **IDE** (VS Code, IntelliJ IDEA ou Eclipse)
 
 ---
@@ -145,6 +179,29 @@ mvn test -Dtest=UsersRestAssuredTest
 ```bash
 mvn test -Dtest=ExecutionBuilderRunner
 ```
+
+### 5. Subir o ServeRest local com Docker
+
+O projeto possui configuração pronta para executar a API localmente:
+
+```bash
+docker compose up -d
+```
+
+Verifique se a API subiu corretamente:
+
+```bash
+http://localhost:3000
+http://localhost:3000/status
+```
+
+Para parar e remover o container local:
+
+```bash
+docker compose down
+```
+
+> Observação: os testes usam a variável `BASE_URL` no arquivo `.env`. Para execução local com Docker, mantenha `BASE_URL=http://localhost:3000`.
 
 ---
 

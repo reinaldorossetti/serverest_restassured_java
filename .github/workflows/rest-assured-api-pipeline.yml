@@ -17,6 +17,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Subir ServeRest com Docker
+        run: docker compose up -d
+
+      - name: Aguardar ServeRest ficar disponível
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3000/status > /dev/null; then
+              echo "✅ ServeRest disponível em http://localhost:3000"
+              exit 0
+            fi
+            echo "⏳ Aguardando ServeRest... tentativa ${i}/30"
+            sleep 2
+          done
+          echo "❌ ServeRest não respondeu a tempo"
+          docker compose logs
+          exit 1
+
+      - name: Configurar BASE_URL para CI
+        run: echo "BASE_URL=http://localhost:3000" > .env
+
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
@@ -25,18 +45,48 @@ jobs:
 
       - name: Run API Tests with Maven
         run: mvn clean test
-        continue-on-error: true
 
       - name: Gera o relatório do Allure
+        if: always()
         run: mvn allure:report
-        continue-on-error: true
+
+      - name: Set up Node.js
+        if: always()
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Gerar PDF do Allure Report
+        if: always()
+        run: npx allure-pdf target/allure-results target/allure-report.pdf
 
       - name: Upload RestAssured Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: target/allure-report
+          path: |
+            target/allure-report
+            target/allure-report.pdf
+
+      - name: Enviar Allure Report por E-mail
+        if: always()
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "📊 Relatório de Testes de API - Allure Report (PDF)"
+          to: reiload@gmail.com
+          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
+          body: "Olá,\n\nSegue em anexo o relatório em PDF dos testes de API executados no GitHub Actions.\n\nAtenciosamente,\nPipeline CI/CD"
+          attachments: target/allure-report.pdf
+
+      - name: Encerrar ambiente Docker
+        if: always()
+        run: docker compose down
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
