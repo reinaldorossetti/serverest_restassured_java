@@ -8,7 +8,6 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import restassured_serverest.utils.FakerUtils;
 import java.util.stream.Stream;
-import org.junit.jupiter.params.ParameterizedTest;
 
 public abstract class BaseApiTest {
 
@@ -24,7 +23,8 @@ public abstract class BaseApiTest {
     public static final String KEY_NOME = "nome";
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_ADMINISTRADOR = "administrador";
-    public static final String password = "SenhaSegura@123";
+    public static final String DEFAULT_TEST_PASSWORD = "SenhaSegura@123";
+    public static final String password = DEFAULT_TEST_PASSWORD;
 
     public static Stream<Arguments> invalidRequiredFieldsPayloads() {
             return Stream.of(
@@ -77,6 +77,15 @@ public abstract class BaseApiTest {
 
     @BeforeAll
     static void setupRestAssured() {
-        RestAssured.baseURI = dotenv.get("BASE_URL_PROD");
+        final boolean isCi = "true".equalsIgnoreCase(System.getenv("CI"));
+
+        final String devUrl = dotenv.get("BASE_URL_DEV");
+        final String prodUrl = dotenv.get("BASE_URL_PROD");
+
+        if (isCi) {
+            RestAssured.baseURI = devUrl != null && !devUrl.isBlank() ? devUrl : "http://localhost:3000";
+        } else {
+            RestAssured.baseURI = prodUrl != null && !prodUrl.isBlank() ? prodUrl : "https://serverest.dev";
+        }
     }
 }

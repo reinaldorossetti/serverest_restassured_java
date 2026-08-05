@@ -25,7 +25,7 @@ Aplicação de gerenciamento de usuários e fluxos de e-commerce que expõe uma 
 | **REQ-04** | Campos Obrigatórios no Payload de Usuário | Validação dos campos obrigatórios no `POST /usuarios`: `nome` (string), `email` (string), `password` (string), `administrador` (string). | ✅ **Coberto** | `UsersFeatureTests.java`<br>• `createNormalUser()`<br>• `createAdminUser()` |
 | **REQ-05** | Suíte de Testes Automatizados | Desenvolver automação cobrindo os cenários positivos e negativos da API. | ✅ **Coberto** | `LoginFeatureTests.java`, `UsersFeatureTests.java`, `CartsFeatureTests.java` |
 | **REQ-06** | Pipeline de CI/CD | Integrar a execução dos testes em esteira automatizada (GitHub Actions). | ✅ **Coberto** | `.github/workflows/rest-assured-api-pipeline.yml` |
-| **REQ-07** | Geração e Envio de Relatórios | Disponibilizar relatórios Allure (HTML no GitHub Pages e PDF anexado por e-mail). | ✅ **Coberto** | `allure-maven`, `allure-pdf`, `peaceiris/actions-gh-pages`, `dawidd6/action-send-mail` |
+| **REQ-07** | Geração e Envio de Relatórios | Disponibilizar relatórios Allure (HTML no GitHub Pages e PDF anexado por e-mail). | ✅ **Coberto** | `allure-maven`, `wkhtmltopdf`, `peaceiris/actions-gh-pages`, `dawidd6/action-send-mail` |
 | **REQ-08** | Documentação do Projeto | Fornecer instruções de execução e arquitetura no repositório GitHub. | ✅ **Coberto** | `README.md`, `TESTING_API.MD`, `Requisitos.md` |
 
 ---

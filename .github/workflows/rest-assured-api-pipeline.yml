@@ -34,9 +34,6 @@ jobs:
           docker compose logs
           exit 1
 
-      - name: Configurar BASE_URL para CI
-        run: echo "BASE_URL=http://localhost:3000" > .env
-
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
@@ -58,7 +55,10 @@ jobs:
 
       - name: Gerar PDF do Allure Report
         if: always()
-        run: npx allure-pdf target/allure-results target/allure-report.pdf
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wkhtmltopdf
+          wkhtmltopdf --enable-local-file-access target/allure-report/index.html target/allure-report.pdf
 
       - name: Upload RestAssured Reports
         if: always()
