@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import java.util.Map;
 import restassured_serverest.BaseApiTest;
 import restassured_serverest.utils.FakerUtils;
 
@@ -23,9 +24,11 @@ import restassured_serverest.utils.FakerUtils;
 public class LoginFeatureTests extends BaseApiTest {
 
     private Response createUser(final String email, final String password, final boolean admin) {
-        final String payload = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"administrador\": \"%s\"\n}",
-                email, email, password, admin ? "true" : "false");
+        final Map<String, Object> payload = Map.of(
+                KEY_NOME, email,
+                KEY_EMAIL, email,
+                KEY_PASSWORD, password,
+                KEY_ADMINISTRADOR, admin ? "true" : "false");
 
         return givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -40,14 +43,16 @@ public class LoginFeatureTests extends BaseApiTest {
     void loginWithValidCredentials() {
         final String email = FakerUtils.randomEmail();
 
-        createUser(email, password, false)
+                createUser(email, DEFAULT_PASSWORD, false)
                 .then()
                 .statusCode(201);
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
                 .basePath(ROTA_LOGIN)
-                .body("{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}")
+                .body(Map.of(
+                        KEY_EMAIL, email,
+                        KEY_PASSWORD, DEFAULT_PASSWORD))
                 .when()
                 .post()
                 .then()
@@ -59,7 +64,9 @@ public class LoginFeatureTests extends BaseApiTest {
     @Test
     @DisplayName("CT02 - Tentar login com credenciais inválidas")
     void loginWithInvalidCredentials() {
-        final String body = "{\n  \"email\": \"usuario@inexistente.com\",\n  \"password\": \"senhaerrada\"\n}";
+        final Map<String, Object> body = Map.of(
+                KEY_EMAIL, "usuario@inexistente.com",
+                KEY_PASSWORD, "senhaerrada");
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -76,33 +83,34 @@ public class LoginFeatureTests extends BaseApiTest {
     @Test
     @DisplayName("CT03 - Validar campos obrigatórios no login")
     void validateRequiredFields() {
-        // 1) Email vazio, senha preenchida
         givenWithAllure()
                 .contentType(ContentType.JSON)
                 .basePath(ROTA_LOGIN)
-                .body("{\"email\": \"\", \"password\": \"senha123\"}")
+                .body(Map.of(
+                        KEY_EMAIL, "",
+                        KEY_PASSWORD, "senha123"))
                 .when()
                 .post()
                 .then()
                 .statusCode(400)
                 .body(KEY_EMAIL, notNullValue());
 
-        // 2) Email preenchido, senha vazia
         givenWithAllure()
                 .contentType(ContentType.JSON)
                 .basePath(ROTA_LOGIN)
-                .body("{\"email\": \"test@email.com\", \"password\": \"\"}")
+                .body(Map.of(
+                        KEY_EMAIL, "test@email.com",
+                        KEY_PASSWORD, ""))
                 .when()
                 .post()
                 .then()
                 .statusCode(400)
                 .body("password", notNullValue());
 
-        // 3) Ambos vazios
         givenWithAllure()
                 .contentType(ContentType.JSON)
                 .basePath(ROTA_LOGIN)
-                .body("{\"email\": \"\", \"password\": \"\"}")
+                .body(Map.of( KEY_EMAIL, "", KEY_PASSWORD, ""))
                 .when()
                 .post()
                 .then()
@@ -124,7 +132,7 @@ public class LoginFeatureTests extends BaseApiTest {
         final Response loginResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
                 .basePath(ROTA_LOGIN)
-                .body("{\"email\": \"" + userEmail + "\", \"password\": \"" + userPassword + "\"}")
+                .body(Map.of(KEY_EMAIL, userEmail, KEY_PASSWORD, userPassword))
                 .when()
                 .post()
                 .then()
@@ -136,9 +144,11 @@ public class LoginFeatureTests extends BaseApiTest {
 
         // Tenta acessar rota protegida de criação de produto
         final String productName = FakerUtils.randomProduct();
-        final String productPayload = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"preco\": 100,\n  \"descricao\": \"Produto gerado com Faker para teste de autenticacao\",\n  \"quantidade\": 10\n}",
-                productName);
+        final Map<String, Object> productPayload = Map.of(
+                KEY_NOME, productName,
+                "preco", 100,
+                "descricao", "Produto gerado com Faker para teste de autenticacao",
+                "quantidade", 10);
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -160,7 +170,8 @@ public class LoginFeatureTests extends BaseApiTest {
         givenWithAllure()
                 .contentType(ContentType.JSON)
                 .basePath(ROTA_LOGIN)
-                .body("{\"email\": \"" + invalidEmail + "\", \"password\": \"senha123\"}")
+                .body(Map.of(KEY_EMAIL, invalidEmail,
+                        KEY_PASSWORD, "senha123"))
                 .when()
                 .post()
                 .then()

@@ -180,7 +180,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String email = FakerUtils.randomEmail();
         String name = FakerUtils.randomName();
         String password = FakerUtils.randomPassword();
-        String administrador = "true";
+        final String administrador = "true";
 
         final String body = bodyPayload(name, email, password, administrador);
 
@@ -238,7 +238,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String email = FakerUtils.randomEmail();
         String name = FakerUtils.randomName();
         String password = FakerUtils.randomPassword();
-        String administrador = "false";
+        final String administrador = "false";
 
         final String body = bodyPayload(name, email, password, administrador);
 
@@ -295,7 +295,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String email = FakerUtils.randomEmail();
         String name = FakerUtils.randomName();
         String password = FakerUtils.randomPassword();
-        String administrador = "true";
+        final String administrador = "true";
 
         final String body = bodyPayload(name, email, password, administrador);
 
@@ -349,7 +349,7 @@ public class UsersFeatureTests extends BaseApiTest {
         String email = FakerUtils.randomEmail();
         String name = FakerUtils.randomName();
         String password = FakerUtils.randomPassword();
-        String administrador = "false";
+        final String administrador = "false";
 
         final String body = bodyPayload(name, email, password, administrador);
 
@@ -518,9 +518,11 @@ public class UsersFeatureTests extends BaseApiTest {
     void prepareDataForNestedObjectValidation() {
         final String complexEmail = FakerUtils.randomEmail();
 
-        final String complexData = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"administrador\": \"true\"\n}",
-                "Complex User", complexEmail, "senha123");
+        final Map<String, String> complexData = Map.of(
+                "nome", "Complex User",
+                "email", complexEmail,
+                "password", "senha123",
+                "administrador", "true");
 
         final Response response = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -549,9 +551,11 @@ public class UsersFeatureTests extends BaseApiTest {
         final String userEmail = FakerUtils.randomEmail();
         final String userPassword = "SenhaSegura@123";
 
-        final String userData = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"administrador\": \"true\"\n}",
-                "User With Cart", userEmail, userPassword);
+        final Map<String, String> userData = Map.of(
+                "nome", "User With Cart",
+                "email", userEmail,
+                "password", userPassword,
+                "administrador", "true");
 
         final Response createUserResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -582,9 +586,11 @@ public class UsersFeatureTests extends BaseApiTest {
         final String userToken = loginResponse.path("authorization");
 
         final String productName = "Product for user cart " + System.currentTimeMillis();
-        final String productData = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"preco\": 100,\n  \"descricao\": \"Product associated to user cart\",\n  \"quantidade\": 5\n}",
-                productName);
+        final Map<String, Object> productData = Map.of(
+                "nome", productName,
+                "preco", 100,
+                "descricao", "Product associated to user cart",
+                "quantidade", 5);
 
         final Response productResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -652,13 +658,17 @@ public class UsersFeatureTests extends BaseApiTest {
         final String email1 = FakerUtils.randomEmail();
         final String email2 = FakerUtils.randomEmail();
 
-        final String user1 = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"administrador\": \"false\"\n}",
-                "User One", email1, "Senha123@");
+        final Map<String, String> user1 = Map.of(
+                "nome", "User One",
+                "email", email1,
+                "password", "Senha123@",
+                "administrador", "false");
 
-        final String user2 = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"administrador\": \"true\"\n}",
-                "User Two", email2, "Senha456@");
+        final Map<String, String> user2 = Map.of(
+                "nome", "User Two",
+                "email", email2,
+                "password", "Senha456@",
+                "administrador", "true");
 
         final Response createUser1Response = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -681,9 +691,11 @@ public class UsersFeatureTests extends BaseApiTest {
 
         final String userId1 = createUser1Response.path(KEY_ID);
 
-        final String updatePayload = String.format(
-                "{\n  \"nome\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"administrador\": \"true\"\n}",
-                "User One Updated", email2, "Senha123@");
+        final Map<String, String> updatePayload = Map.of(
+                "nome", "User One Updated",
+                "email", email2,
+                "password", "Senha123@",
+                "administrador", "true");
 
         givenWithAllure()
                 .contentType(ContentType.JSON)

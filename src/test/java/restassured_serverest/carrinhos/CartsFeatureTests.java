@@ -13,6 +13,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import java.util.List;
+import java.util.Map;
 import restassured_serverest.BaseApiTest;
 import restassured_serverest.utils.FakerUtils;
 
@@ -25,7 +27,11 @@ public class CartsFeatureTests extends BaseApiTest {
         final String userEmail = FakerUtils.randomEmail();
         final String userPassword = "SenhaSegura@123";
 
-        final String newUser = bodyEmailAndPassword(userEmail, userPassword);
+        final Map<String, Object> newUser = Map.of(
+                KEY_NOME, "Cart Default User",
+                KEY_EMAIL, userEmail,
+                KEY_PASSWORD, userPassword,
+                KEY_ADMINISTRADOR, "true");
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -36,10 +42,9 @@ public class CartsFeatureTests extends BaseApiTest {
                 .then()
                 .statusCode(201);
 
-        final String loginPayload = "{" +
-                "\"email\":\"" + userEmail + "\"," +
-                "\"password\":\"" + userPassword + "\"" +
-                "}";
+        final Map<String, Object> loginPayload = Map.of(
+                KEY_EMAIL, userEmail,
+                KEY_PASSWORD, userPassword);
 
         return givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -53,12 +58,11 @@ public class CartsFeatureTests extends BaseApiTest {
         final String userEmail = FakerUtils.randomEmail();
         final String userPassword = "SenhaSegura@123";
 
-        final String newUser = "{"
-                + "\"nome\":\"Cart User\","
-                + "\"email\":\"" + userEmail + "\","
-                + "\"password\":\"" + userPassword + "\","
-                + "\"administrador\":\"true\""
-                + "}";
+        final Map<String, Object> newUser = Map.of(
+                KEY_NOME, "Cart User",
+                KEY_EMAIL, userEmail,
+                KEY_PASSWORD, userPassword,
+                KEY_ADMINISTRADOR, "true");
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -69,10 +73,9 @@ public class CartsFeatureTests extends BaseApiTest {
                 .then()
                 .statusCode(201);
 
-        final String loginPayload = "{"
-                + "\"email\":\"" + userEmail + "\","
-                + "\"password\":\"" + userPassword + "\""
-                + "}";
+        final Map<String, Object> loginPayload = Map.of(
+                KEY_EMAIL, userEmail,
+                KEY_PASSWORD, userPassword);
 
         final Response loginResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -90,12 +93,11 @@ public class CartsFeatureTests extends BaseApiTest {
     private String createProduct(final String token, final int price, final int quantity, final String description) {
         final String productName = FakerUtils.randomProduct();
 
-        final String productData = "{"
-                + "\"nome\":\"" + productName + "\","
-                + "\"preco\":" + price + ","
-                + "\"descricao\":\"" + description + "\","
-                + "\"quantidade\":" + quantity
-                + "}";
+        final Map<String, Object> productData = Map.of(
+                KEY_NOME, productName,
+                "preco", price,
+                "descricao", description,
+                "quantidade", quantity);
 
         final Response productResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -127,7 +129,9 @@ public class CartsFeatureTests extends BaseApiTest {
 
         final String productId = createProduct(token, 150, 10, "Product created for cart lifecycle test");
 
-        final String cartBody = "{\"produtos\":[{\"idProduto\":\"" + productId + "\",\"quantidade\":2}]}";
+        final Map<String, Object> cartBody = Map.of(
+                "produtos", List.of(
+                        Map.of("idProduto", productId, "quantidade", 2)));
 
         final Response createCartResponse = givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -191,7 +195,9 @@ public class CartsFeatureTests extends BaseApiTest {
 
         final String productId = createProduct(token, 200, 5, "Product for cancel purchase test");
 
-        final String cartBody = "{\"produtos\":[{\"idProduto\":\"" + productId + "\",\"quantidade\":1}]}";
+        final Map<String, Object> cartBody = Map.of(
+                "produtos", List.of(
+                        Map.of("idProduto", productId, "quantidade", 1)));
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -218,7 +224,9 @@ public class CartsFeatureTests extends BaseApiTest {
     @Test
     @DisplayName("CT03 - Impedir criação de carrinho sem token de autenticação")
     void preventCreatingCartWithoutAuthenticationToken() {
-        final String cartBody = "{\"produtos\":[{\"idProduto\":\"BeeJh5lz3k6kSIzA\",\"quantidade\":1}]}";
+        final Map<String, Object> cartBody = Map.of(
+                "produtos", List.of(
+                        Map.of("idProduto", "BeeJh5lz3k6kSIzA", "quantidade", 1)));
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -252,7 +260,9 @@ public class CartsFeatureTests extends BaseApiTest {
 
         final String productId = createProduct(token, 120, 3, "Product for multiple cart test");
 
-        final String firstCart = "{\"produtos\":[{\"idProduto\":\"" + productId + "\",\"quantidade\":1}]}";
+        final Map<String, Object> firstCart = Map.of(
+                "produtos", List.of(
+                        Map.of("idProduto", productId, "quantidade", 1)));
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -308,7 +318,9 @@ public class CartsFeatureTests extends BaseApiTest {
 
         final String productId = createProduct(token, 100, 1, "Low stock product for cart test");
 
-        final String cartBody = "{\"produtos\":[{\"idProduto\":\"" + productId + "\",\"quantidade\":2}]}";
+        final Map<String, Object> cartBody = Map.of(
+                "produtos", List.of(
+                        Map.of("idProduto", productId, "quantidade", 2)));
 
         givenWithAllure()
                 .contentType(ContentType.JSON)
@@ -342,8 +354,10 @@ public class CartsFeatureTests extends BaseApiTest {
 
         final String productId = createProduct(token, 150, 10, "Product created for duplicated products cart test");
 
-        final String duplicatedCartBody = "{\"produtos\":[{\"idProduto\":\"" + productId
-                + "\",\"quantidade\":1},{\"idProduto\":\"" + productId + "\",\"quantidade\":1}]}";
+        final Map<String, Object> duplicatedCartBody = Map.of(
+                "produtos", List.of(
+                        Map.of("idProduto", productId, "quantidade", 1),
+                        Map.of("idProduto", productId, "quantidade", 1)));
 
         givenWithAllure()
                 .contentType(ContentType.JSON)

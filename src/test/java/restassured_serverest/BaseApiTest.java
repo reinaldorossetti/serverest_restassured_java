@@ -23,8 +23,14 @@ public abstract class BaseApiTest {
     public static final String KEY_NOME = "nome";
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_ADMINISTRADOR = "administrador";
-    public static final String DEFAULT_TEST_PASSWORD = "SenhaSegura@123";
-    public static final String password = DEFAULT_TEST_PASSWORD;
+    public static final String DEFAULT_PASSWORD = "SenhaSegura@123";
+    public static final String PASSWORD = DEFAULT_PASSWORD;
+
+    private static final Dotenv DOTENV = Dotenv.configure()
+        .directory("./.env")
+        .ignoreIfMalformed()
+        .ignoreIfMissing()
+        .load();
 
     public static Stream<Arguments> invalidRequiredFieldsPayloads() {
             return Stream.of(
@@ -38,17 +44,11 @@ public abstract class BaseApiTest {
                         Arguments.of("administrador vazio", "{\n  \"nome\": \"Usuário admin vazio\",\n  \"email\": \"required.admin.empty@test.com\",\n  \"password\": \"Senha123@\",\n  \"administrador\": \"\"\n}", "administrador"));
     }
 
-    static Dotenv dotenv = Dotenv.configure()
-        .directory("./.env")
-        .ignoreIfMalformed()
-        .ignoreIfMissing()
-        .load();
-
     protected RequestSpecification givenWithAllure() {
         return RestAssured.given().filter(new AllureRestAssured());
     }
 
-    protected String bodyPayload(String name, String email, String  password, String administrador) {
+    protected String bodyPayload(final String name, final String email, final String  password, final String administrador) {
         return "{\n" +
                 "  \"nome\": \"" + name + "\",\n" +
                 "  \"email\": \"" + email + "\",\n" +
@@ -57,7 +57,7 @@ public abstract class BaseApiTest {
                 "}";
     }
 
-    protected String bodyEmail(String email) {
+    protected String bodyEmail(final String email) {
         final String name = FakerUtils.randomName();
         final String password = FakerUtils.randomPassword();
 
@@ -65,7 +65,7 @@ public abstract class BaseApiTest {
                 "\"password\": \"" + password + "\",\n  \"administrador\": \"false\"\n}";
     }
 
-    protected String bodyEmailAndPassword(String email, String password) {
+    protected String bodyEmailAndPassword(final String email, final String password) {
 
         return "{" +
                 "\"nome\":\"Cart Default User\"," +
@@ -79,8 +79,8 @@ public abstract class BaseApiTest {
     static void setupRestAssured() {
         final boolean isCi = "true".equalsIgnoreCase(System.getenv("CI"));
 
-        final String devUrl = dotenv.get("BASE_URL_DEV");
-        final String prodUrl = dotenv.get("BASE_URL_PROD");
+        final String devUrl = DOTENV.get("BASE_URL_DEV");
+        final String prodUrl = DOTENV.get("BASE_URL_PROD");
 
         if (isCi) {
             RestAssured.baseURI = devUrl != null && !devUrl.isBlank() ? devUrl : "http://localhost:3000";
