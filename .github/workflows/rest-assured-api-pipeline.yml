@@ -43,9 +43,10 @@ jobs:
       - name: Run API Tests with Maven
         run: mvn clean test
 
-      - name: Gera o relatório do Allure
+      - name: Gerar relatório Allure (Linux)
         if: always()
         run: mvn allure:report
+        continue-on-error: true
 
       - name: Set up Node.js
         if: always()
@@ -53,20 +54,21 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Gerar PDF do Allure Report
+      - name: Gerar relatório HTML Allure (Linux)
         if: always()
         run: |
           npm install -g allure-commandline
           allure generate --single-file target/allure-results --clean -o target/allure-report
         continue-on-error: true
 
-      - name: Upload RestAssured Reports
+      - name: Upload relatório Allure (Linux)
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: allure-report
+          name: allure-report-linux
           path: |
-            target/allure-report/index.html
+            target/allure-report/
+          if-no-files-found: warn
 
       - name: Encerrar ambiente Docker
         if: always()
@@ -80,3 +82,84 @@ jobs:
           publish_branch: gh-pages  # default: gh-pages
           publish_dir: target/allure-report
           destination_dir: allure-report
+
+      - name: Exibir link do relatório publicado
+        if: success()
+        env:
+          REPORT_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/
+        run: |
+          echo "### Relatório Allure (Linux)" >> "$GITHUB_STEP_SUMMARY"
+          echo "[Abrir relatório]($REPORT_URL)" >> "$GITHUB_STEP_SUMMARY"
+
+  test-windows:
+    runs-on: windows-latest
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Subir ServeRest com Docker
+        run: docker compose -f docker-compose.serverest.yml up -d
+
+      - name: Aguardar ServeRest ficar disponível
+        shell: pwsh
+        run: |
+          $ready = $false
+          for ($i = 1; $i -le 30; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri 'http://localhost:3000/status' -UseBasicParsing -TimeoutSec 5
+              if ($response.StatusCode -eq 200) {
+                Write-Host 'ServeRest disponível em http://localhost:3000'
+                $ready = $true
+                break
+              }
+            } catch {
+              Write-Host "Aguardando ServeRest... tentativa $i/30"
+            }
+            Start-Sleep -Seconds 2
+          }
+          if (-not $ready) {
+            docker compose -f docker-compose.serverest.yml logs
+            throw 'ServeRest não respondeu a tempo'
+          }
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+
+      - name: Run API Tests with Maven on Windows
+        run: mvn clean test
+
+      - name: Gerar relatório Allure (Windows)
+        if: always()
+        run: mvn allure:report
+        continue-on-error: true
+
+      - name: Set up Node.js
+        if: always()
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Gerar relatório HTML Allure (Windows)
+        if: always()
+        shell: pwsh
+        run: |
+          npm install -g allure-commandline
+          allure generate --single-file target/allure-results --clean -o target/allure-report
+        continue-on-error: true
+
+      - name: Upload relatório Allure (Windows)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report-windows
+          path: target/allure-report/
+          if-no-files-found: warn
+
+      - name: Encerrar ambiente Docker
+        if: always()
+        run: docker compose -f docker-compose.serverest.yml down
+        continue-on-error: true

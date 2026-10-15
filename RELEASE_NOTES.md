@@ -14,6 +14,9 @@ Este documento registra as mudanças realizadas no projeto.
 
 ### Alterado
 
+- Dependências de teste vulneráveis: JavaFaker substituído por Datafaker `2.7.0` (removendo o SnakeYAML Android `1.23`); Jackson alinhado em `2.22.3`; XStream atualizado para `1.4.21`; json-smart atualizado para `2.5.2`.
+- Rest Assured e JSON Schema Validator atualizados para `6.1.0`; módulos Groovy alinhados em `3.0.25` pelo BOM; adaptadores Allure atualizados para `2.35.5`, usando o novo artefato `allure-jupiter`. O plugin Allure Maven permanece em `2.17.0`, com versão configurada separadamente.
+- Escopos de `dotenv-java`, JUnit API e JUnit Engine corrigidos para `test`; dependências de Surefire e Allure Maven removidas do classpath de aplicação e mantidas como plugins Maven.
 - Pacote Java de `restassured_serverest` para `dev.serverest`, com atualização dos imports, diretórios e referências de documentação/comandos.
 - Coordenadas Maven: `groupId` alterado de `com.example` para `dev.serverest` e URL do projeto definida como `https://serverest.dev/`.
 - Versão Maven incrementada de `1.0.0-SNAPSHOT` para `1.0.1-SNAPSHOT`.

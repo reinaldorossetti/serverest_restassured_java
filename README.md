@@ -1,11 +1,11 @@
 # 🧪 Rest Assured API Testing - ServeRest
 
-[![RestAssured](https://img.shields.io/badge/RestAssured-6.0.0-blue.svg)](https://rest-assured.io/)
+[![RestAssured](https://img.shields.io/badge/RestAssured-6.1.0-blue.svg)](https://rest-assured.io/)
 [![JUnit5](https://img.shields.io/badge/JUnit-5.10.1-green.svg)](https://junit.org/junit5/)
 [![Java](https://img.shields.io/badge/Java-23-orange.svg)](https://www.oracle.com/java/)
 [![PMD](https://img.shields.io/badge/PMD-7.7.0-brightgreen.svg)](https://pmd.github.io/)
 
-- Projeto de automação de testes de API utilizando **Rest Assured 6.0.0** e **Java 23** para validar a API REST **ServeRest** — uma plataforma que simula os serviços de um e-commerce.
+- Projeto de automação de testes de API utilizando **Rest Assured 6.1.0** e **Java 23** para validar a API REST **ServeRest** — uma plataforma que simula os serviços de um e-commerce.
 
 - Estruturado com boas práticas de engenharia de software (Clean Code, SOLID).
 - Relatórios interativos com o **Allure Report**, análise estática de código com **PMD 7** e integração com **GitHub Actions** e relatórios no **GitHub Pages**.
@@ -53,7 +53,7 @@ mvn clean test
 mvn allure:serve
 ````
 
-- **Relatório dos Testes no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/)
+- **Relatório Allure publicado (Linux)**: [Abrir relatório](https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/)
 
 - **Mapeamento dos Testes**: [TESTING_API.MD](TESTING_API.MD)
 - **Catálogo de testes do Swagger**: [SWAGGER_TESTS.md](SWAGGER_TESTS.md)
@@ -77,6 +77,7 @@ mvn allure:serve
 - [Exemplos de Testes](#-exemplos-de-testes)
 - [Teste de Carga (JMeter DSL)](#-teste-de-carga-jmeter-dsl)
 - [Relatórios Allure](#-relatórios-allure)
+- [Heurísticas Adotadas](#-heurísticas-adotadas)
 - [Boas Práticas](#-boas-práticas)
 
 ---
@@ -207,14 +208,19 @@ serverest_restassured_java/
 | Componente | Grupo / Artefato | Versão |
 |------------|------------------|--------|
 | **Java** | `compiler.source / target` | `23` |
-| **Rest Assured** | `io.rest-assured:rest-assured` | `6.0.0` |
-| **Rest Assured JSON Schema** | `io.rest-assured:json-schema-validator` | `6.0.0` |
+| **Rest Assured** | `io.rest-assured:rest-assured` | `6.1.0` |
+| **Rest Assured JSON Schema** | `io.rest-assured:json-schema-validator` | `6.1.0` |
 | **JUnit 5** | `org.junit.jupiter:junit-jupiter-api` | `5.10.1` |
 | **JUnit Platform** | `org.junit.platform:junit-platform-suite-api` | `1.10.1` |
 | **JMeter Java DSL** | `us.abstracta.jmeter:jmeter-java-dsl` | `2.2` |
-| **Allure Rest Assured** | `io.qameta.allure:allure-rest-assured` | `2.17.0` |
-| **Allure JUnit 5** | `io.qameta.allure:allure-junit5` | `2.17.0` |
-| **Java Faker** | `com.github.javafaker:javafaker` | `1.0.2` |
+| **Groovy** | `org.codehaus.groovy:groovy` (módulos alinhados pelo BOM) | `3.0.25` |
+| **Jackson BOM** | `com.fasterxml.jackson:jackson-bom` | `2.22.3` |
+| **Allure Rest Assured** | `io.qameta.allure:allure-rest-assured` | `2.35.5` |
+| **Allure JUnit 5** | `io.qameta.allure:allure-jupiter` | `2.35.5` |
+| **Allure Maven Plugin** | `io.qameta.allure:allure-maven` | `2.17.0` |
+| **Datafaker** | `net.datafaker:datafaker` | `2.7.0` |
+| **XStream** | `com.thoughtworks.xstream:xstream` | `1.4.21` |
+| **json-smart** | `net.minidev:json-smart` | `2.5.2` |
 | **Maven Checkstyle Plugin** | `org.apache.maven.plugins:maven-checkstyle-plugin` | `3.3.1` |
 | **Maven PMD Plugin** | `org.apache.maven.plugins:maven-pmd-plugin` | `3.26.0` (PMD 7.7.0) |
 
@@ -311,15 +317,17 @@ mvn validate
 
 ## ⚙️ Esteira CI/CD - GitHub Actions
 
-A integração contínua é executada automaticamente no GitHub Actions através do workflow `.github/workflows/rest-assured-api-pipeline.yml`.
+A integração contínua é executada automaticamente no GitHub Actions através do workflow `.github/workflows/rest-assured-api-pipeline.yml`. A suíte roda em `ubuntu-latest` e `windows-latest`; cada runner gera e envia seu próprio relatório Allure como artefato (`allure-report-linux` e `allure-report-windows`). O relatório Linux é publicado no GitHub Pages, e o workflow mostra o link no resumo do job. O relatório Windows fica disponível para download na seção **Artifacts** da execução do workflow.
 
 ### Passos da Esteira:
 1. Checkout do código-fonte.
-2. Subida da API local via Docker Compose.
+2. Subida da API local via Docker Compose nos runners Ubuntu e Windows.
 3. Configuração do ambiente **Java 23**.
 4. Execução dos testes automatizados via Maven.
-5. Geração do relatório **Allure Report** e PDF.
-6. Upload de artefatos, envio de e-mail e publicação automática no **GitHub Pages**.
+5. Geração e upload dos relatórios **Allure HTML** nos dois runners.
+6. Publicação do relatório produzido no Ubuntu no **GitHub Pages**.
+
+No runner Windows, a disponibilidade da API é verificada com PowerShell antes dos testes, e o container é encerrado mesmo quando a execução falha. Os relatórios por sistema operacional ficam disponíveis para download nos artefatos da execução do workflow.
 
 ---
 
@@ -454,6 +462,20 @@ O relatório interativo exibe:
 - Status de aprovação dos testes.
 - Anexo completo de requisições e respostas HTTP (corpo, headers, status code).
 - Gráficos de tempo de execução e cobertura das suítes.
+
+---
+
+## 🧭 Heurísticas Adotadas
+
+O projeto utiliza a heurística **VADER** como checklist para orientar a cobertura dos testes de API:
+
+- **V — Verbs (Verbos):** valida os principais fluxos HTTP, os dados retornados e as regras de negócio das operações.
+- **A — Authentication (Autenticação):** verifica login, tokens, autorização e acesso a recursos protegidos.
+- **D — Data (Dados):** avalia campos obrigatórios, formatos, tipos, integridade e contratos JSON.
+- **E — Errors (Erros):** valida status HTTP, mensagens e comportamentos esperados para entradas inválidas e falhas funcionais.
+- **R — Responsiveness (Capacidade de resposta):** permanece como referência para desempenho e carga, sendo tratado separadamente nos testes NFR.
+
+A análise detalhada da cobertura, das lacunas e das melhorias planejadas está disponível em [Heuristicas.MD](Heuristicas.MD).
 
 ---
 

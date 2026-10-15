@@ -1,6 +1,6 @@
 package dev.serverest.utils;
 
-import com.github.javafaker.Faker;
+import net.datafaker.Faker;
 
 /** Utility class to provide random test data using Java Faker. */
 public class FakerUtils {

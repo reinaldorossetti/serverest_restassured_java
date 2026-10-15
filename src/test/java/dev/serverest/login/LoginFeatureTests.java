@@ -171,6 +171,6 @@ public class LoginFeatureTests extends BaseApiTest {
         .then()
         .statusCode(400)
         .body(KEY_EMAIL, notNullValue())
-        .body(KEY_EMAIL, containsString(""));
+        .body(KEY_EMAIL, containsString("email"));
   }
 }

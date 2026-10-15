@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.serverest.BaseApiTest;
@@ -260,9 +262,8 @@ public class UsersFeatureTests extends BaseApiTest {
   @Test
   @Order(10)
   @Severity(SeverityLevel.NORMAL)
-  @DisplayName(
-      "CT10 - Cenário Negativo - Validar se existe retorno de erro ao buscar usuário inexistente")
-  void advancedJsonValidationsWithFilters() {
+  @DisplayName("CT10 - Filtrar usuários administradores e validar os resultados")
+  void listAdminUsersUsingFilterAndValidateResponse() {
     final Response response =
         givenWithAllure()
             .basePath(ROTA_USUARIOS)
@@ -298,10 +299,14 @@ public class UsersFeatureTests extends BaseApiTest {
         givenWithAllure().basePath(ROTA_USUARIOS).when().get().then().statusCode(200)
             .extract().response();
     final Map<String, Object> user = response.path("usuarios[0]");
-    final String email = String.valueOf(user.get(KEY_EMAIL));
-    final String password = String.valueOf(user.get("password"));
-    assertTrue(email != null && email.length() > 5);
-    assertTrue(password != null && password.length() > 0);
+    final Object emailValue = user.get(KEY_EMAIL);
+    final Object passwordValue = user.get(KEY_PASSWORD);
+    assertNotNull(emailValue, "O e-mail do usuário não deve ser nulo");
+    assertNotNull(passwordValue, "A senha do usuário não deve ser nula");
+    assertTrue(emailValue instanceof String, "O e-mail deve ser uma string");
+    assertTrue(passwordValue instanceof String, "A senha deve ser uma string");
+    assertFalse(((String) emailValue).isBlank(), "O e-mail não deve estar vazio");
+    assertFalse(((String) passwordValue).isBlank(), "A senha não deve estar vazia");
   }
 
   @Test
@@ -320,8 +325,8 @@ public class UsersFeatureTests extends BaseApiTest {
   @Test
   @Order(13)
   @Severity(SeverityLevel.MINOR)
-  @DisplayName("CT13 - Cenário Negativo - Preparar dados para validação de cadastro")
-  void prepareDataForNestedObjectValidation() {
+  @DisplayName("CT13 - Cadastrar usuário com payload válido e validar resposta")
+  void createUserWithValidPayloadAndValidateResponse() {
     final String complexEmail = FakerUtils.randomEmail();
     final Map<String, String> complexData =
         Map.of(
