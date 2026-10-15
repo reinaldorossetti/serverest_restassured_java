@@ -148,6 +148,7 @@ docker compose -f docker-compose.serverest.yml down
 Comportamento atual:
 - `CI=true` (pipeline): usa `BASE_URL_DEV` (fallback: `http://localhost:3000`)
 - Execução local: usa `BASE_URL_PROD` (fallback: `https://serverest.dev`)
+- A URL de produção também pode ser informada pela linha de comando: `mvn clean test -DBASE_URL_PROD=https://serverest.dev`
 
 ### Docker na pipeline (GitHub Actions)
 
@@ -321,13 +322,13 @@ A integração contínua é executada automaticamente no GitHub Actions através
 
 ### Passos da Esteira:
 1. Checkout do código-fonte.
-2. Subida da API local via Docker Compose nos runners Ubuntu e Windows.
+2. Subida da API local via Docker Compose no runner Ubuntu; o runner Windows valida o endpoint público `https://serverest.dev`, pois a imagem Docker do ServeRest é Linux-only.
 3. Configuração do ambiente **Java 23**.
 4. Execução dos testes automatizados via Maven.
 5. Geração e upload dos relatórios **Allure HTML** nos dois runners.
 6. Publicação do relatório produzido no Ubuntu no **GitHub Pages**.
 
-No runner Windows, a disponibilidade da API é verificada com PowerShell antes dos testes, e o container é encerrado mesmo quando a execução falha. Os relatórios por sistema operacional ficam disponíveis para download nos artefatos da execução do workflow.
+No runner Windows, a disponibilidade da API pública é verificada com PowerShell antes dos testes. Os relatórios por sistema operacional ficam disponíveis para download nos artefatos da execução do workflow.
 
 ---
 

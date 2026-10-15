@@ -107,7 +107,10 @@ public class RateLimitLoadTests {
   private String resolveBaseUrl() {
     final boolean isCi = "true".equalsIgnoreCase(System.getenv("CI"));
     final String devUrl = DOTENV.get("BASE_URL_DEV");
-    final String prodUrl = DOTENV.get("BASE_URL_PROD");
+    final String systemProdUrl = System.getProperty("BASE_URL_PROD");
+    final String dotenvProdUrl = DOTENV.get("BASE_URL_PROD");
+    final String prodUrl =
+        systemProdUrl != null && !systemProdUrl.isBlank() ? systemProdUrl : dotenvProdUrl;
     if (isCi) {
       return devUrl != null && !devUrl.isBlank() ? devUrl : "http://localhost:3000";
     }

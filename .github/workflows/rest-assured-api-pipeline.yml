@@ -94,22 +94,21 @@ jobs:
   test-windows:
     runs-on: windows-latest
     env:
-      CI: 'true'
+      # The Compose image is Linux-only and cannot run on the Windows runner's
+      # Docker daemon. Use the public ServeRest endpoint for Windows coverage.
+      CI: 'false'
     steps:
       - uses: actions/checkout@v7
 
-      - name: Subir ServeRest com Docker
-        run: docker compose -f docker-compose.serverest.yml up -d
-
-      - name: Aguardar ServeRest ficar disponível
+      - name: Validar ServeRest público
         shell: pwsh
         run: |
           $ready = $false
           for ($i = 1; $i -le 30; $i++) {
             try {
-              $response = Invoke-WebRequest -Uri 'http://localhost:3000/status' -UseBasicParsing -TimeoutSec 5
+              $response = Invoke-WebRequest -Uri 'https://serverest.dev' -UseBasicParsing -TimeoutSec 5
               if ($response.StatusCode -eq 200) {
-                Write-Host 'ServeRest disponível em http://localhost:3000'
+                Write-Host 'ServeRest disponível em https://serverest.dev'
                 $ready = $true
                 break
               }
@@ -119,7 +118,6 @@ jobs:
             Start-Sleep -Seconds 2
           }
           if (-not $ready) {
-            docker compose -f docker-compose.serverest.yml logs
             throw 'ServeRest não respondeu a tempo'
           }
 
@@ -130,7 +128,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Run API Tests with Maven on Windows
-        run: mvn clean test
+        run: mvn clean test -DBASE_URL_PROD=https://serverest.dev
 
       - name: Gerar relatório Allure (Windows)
         if: always()
@@ -158,8 +156,3 @@ jobs:
           name: allure-report-windows
           path: target/allure-report/
           if-no-files-found: warn
-
-      - name: Encerrar ambiente Docker
-        if: always()
-        run: docker compose -f docker-compose.serverest.yml down
-        continue-on-error: true

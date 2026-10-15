@@ -145,19 +145,25 @@ public abstract class BaseApiTest {
    *
    * <p>When {@code CI=true}, uses {@code BASE_URL_DEV} or defaults to
    * {@code http://localhost:3000}. Otherwise, uses {@code BASE_URL_PROD} or defaults to
-   * {@code https://serverest.dev}. Variables are loaded from the optional {@code .env} file.
+   * {@code https://serverest.dev}. {@code BASE_URL_PROD} may also be supplied as a system
+   * property, for example {@code mvn test -DBASE_URL_PROD=https://serverest.dev}.
    */
   @BeforeAll
   static void setupRestAssured() {
     final boolean isCi = "true".equalsIgnoreCase(System.getenv("CI"));
 
     final String devUrl = DOTENV.get("BASE_URL_DEV");
-    final String prodUrl = DOTENV.get("BASE_URL_PROD");
+    final String prodUrl = configuredValue("BASE_URL_PROD", DOTENV.get("BASE_URL_PROD"));
 
     if (isCi) {
       RestAssured.baseURI = devUrl != null && !devUrl.isBlank() ? devUrl : "http://localhost:3000";
     } else {
       RestAssured.baseURI = prodUrl != null && !prodUrl.isBlank() ? prodUrl : "https://serverest.dev";
     }
+  }
+
+  private static String configuredValue(final String key, final String dotenvValue) {
+    final String systemValue = System.getProperty(key);
+    return systemValue != null && !systemValue.isBlank() ? systemValue : dotenvValue;
   }
 }
