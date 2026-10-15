@@ -3,7 +3,7 @@
 Este documento reflete **o estado real do projeto atual** (JUnit 5 + Rest Assured), incluindo testes funcionais e não funcionais.
 
 - Base URL pública: `https://serverest.dev`
-- Classe base: `src/test/java/restassured_serverest/BaseApiTest.java`
+- Classe base: `src/test/java/dev/serverest/BaseApiTest.java`
 - Frameworks: JUnit 5, Rest Assured, Hamcrest, Allure
 
 ---
@@ -36,7 +36,7 @@ Este documento reflete **o estado real do projeto atual** (JUnit 5 + Rest Assure
 
 ## 1) Login
 
-Arquivo: `src/test/java/restassured_serverest/login/LoginFeatureTests.java`
+Arquivo: `src/test/java/dev/serverest/login/LoginFeatureTests.java`
 
 | CT | Cenário | Endpoint(s) principal(is) |
 |---|---|---|
@@ -50,7 +50,7 @@ Arquivo: `src/test/java/restassured_serverest/login/LoginFeatureTests.java`
 
 ## 2) Usuários
 
-Arquivo: `src/test/java/restassured_serverest/usuarios/UsersFeatureTests.java`
+Arquivo: `src/test/java/dev/serverest/usuarios/UsersFeatureTests.java`
 
 | CT | Cenário | Endpoint(s) principal(is) |
 |---|---|---|
@@ -82,7 +82,7 @@ Arquivo: `src/test/java/restassured_serverest/usuarios/UsersFeatureTests.java`
 
 ## 3) Carrinhos
 
-Arquivo: `src/test/java/restassured_serverest/carrinhos/CartsFeatureTests.java`
+Arquivo: `src/test/java/dev/serverest/carrinhos/CartsFeatureTests.java`
 
 | CT | Cenário | Endpoint(s) principal(is) |
 |---|---|---|
@@ -98,7 +98,7 @@ Arquivo: `src/test/java/restassured_serverest/carrinhos/CartsFeatureTests.java`
 
 ## 4) Carga / NFR
 
-Arquivo: `src/test/java/restassured_serverest/performance/RateLimitLoadTests.java`
+Arquivo: `src/test/java/dev/serverest/performance/RateLimitLoadTests.java`
 
 | Cenário | Objetivo | Configuração atual |
 |---|---|---|

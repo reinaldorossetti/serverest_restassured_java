@@ -50,11 +50,14 @@ Para rodar os testes (Observação precisa do Java JDK 23+ e Maven 3.6+):
 git clone https://github.com/reinaldorossetti/serverest_restassured_java.git
 cd serverest_restassured_java
 mvn clean test
+mvn allure:serve
 ````
 
 - **Relatório dos Testes no GitHub Pages**: [https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/](https://reinaldorossetti.github.io/serverest_restassured_java/allure-report/)
 
 - **Mapeamento dos Testes**: [TESTING_API.MD](TESTING_API.MD)
+- **Catálogo de testes do Swagger**: [SWAGGER_TESTS.md](SWAGGER_TESTS.md)
+- **Notas de release**: [RELEASE_NOTES.md](RELEASE_NOTES.md)
 
 - **Requisitos do Projeto**: [Requisitos.md](Requisitos.md)
 
@@ -159,7 +162,7 @@ serverest_restassured_java/
 ├── src/
 │   └── test/
 │       ├── java/
-│       │   └── restassured_serverest/
+│       │   └── dev/serverest/
 │       │       ├── BaseApiTest.java               # Configurações base (BaseURI, RequestSpecs, Filtro Allure)
 │       │       ├── performance/
 │       │       │   └── RateLimitLoadTests.java    # Teste de carga com JMeter DSL + geração de log de análise
@@ -212,6 +215,7 @@ serverest_restassured_java/
 | **Allure Rest Assured** | `io.qameta.allure:allure-rest-assured` | `2.17.0` |
 | **Allure JUnit 5** | `io.qameta.allure:allure-junit5` | `2.17.0` |
 | **Java Faker** | `com.github.javafaker:javafaker` | `1.0.2` |
+| **Maven Checkstyle Plugin** | `org.apache.maven.plugins:maven-checkstyle-plugin` | `3.3.1` |
 | **Maven PMD Plugin** | `org.apache.maven.plugins:maven-pmd-plugin` | `3.26.0` (PMD 7.7.0) |
 
 ---
@@ -232,12 +236,12 @@ mvn clean test
 
 ### 3. Executar uma suíte específica
 ```bash
-mvn "-Dtest=restassured_serverest.usuarios.UsersFeatureTests" test
+mvn "-Dtest=dev.serverest.usuarios.UsersFeatureTests" test
 ```
 
 ### 4. Executar suíte de login
 ```bash
-mvn "-Dtest=restassured_serverest.login.LoginFeatureTests" test
+mvn "-Dtest=dev.serverest.login.LoginFeatureTests" test
 ```
 
 ### 5. Subir o ServeRest local com Docker
@@ -276,6 +280,32 @@ mvn pmd:check
 
 - **Arquivo de Regras Customizado**: [`pmd-ruleset.xml`](pmd-ruleset.xml)
 - **Relatório de Saída**: `target/pmd.xml`
+
+## 📏 Análise de estilo Java (Checkstyle)
+
+O Checkstyle é configurado como **plugin de build Maven** (não como dependência da aplicação) e usa as regras Google (`google_checks.xml`). A análise inclui as fontes de teste em `src/test/java`. O arquivo [`checkstyle-suppressions.xml`](checkstyle-suppressions.xml) suprime somente a regra `LineLength` para arquivos Java; as demais regras continuam sendo verificadas. Os avisos encontrados são exibidos, mas não bloqueiam o build (`failOnViolation=false`).
+
+Executar a verificação diretamente:
+
+```bash
+mvn checkstyle:check
+```
+
+Gerar o relatório HTML:
+
+```bash
+mvn checkstyle:checkstyle
+```
+
+O plugin também está ligado à fase `validate`, portanto pode ser executado junto da validação Maven:
+
+```bash
+mvn validate
+```
+
+- **Relatório XML da verificação**: `target/checkstyle-result.xml`
+- **Relatório HTML**: `target/site/checkstyle.html`
+- **Supressões de regras**: [`checkstyle-suppressions.xml`](checkstyle-suppressions.xml)
 
 ---
 
@@ -400,7 +430,7 @@ O projeto possui o teste `RateLimitLoadTests` para simulação de carga no endpo
 > O teste está marcado com `@Disabled` por padrão (NFR), então execute com a condição desativada no JUnit:
 
 ```bash
-mvn "-Dtest=restassured_serverest.performance.RateLimitLoadTests" "-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition" test
+mvn "-Dtest=dev.serverest.performance.RateLimitLoadTests" "-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition" test
 ```
 
 ### Artefatos de log gerados
@@ -430,8 +460,8 @@ O relatório interativo exibe:
 ## 🎓 Boas Práticas Aplicadas
 
 1. **Separação por Recurso**: Suítes isoladas por domínio (`UsersFeatureTests`, `CartsFeatureTests`, `LoginFeatureTests`).
-2. **Dados Dinâmicos**: Uso de [FakerUtils.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/utils/FakerUtils.java) para gerar massas de teste sem causar colisões.
-3. **Padrão DRY (Don't Repeat Yourself)**: Reutilização de especificações na classe base [BaseApiTest.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/restassured_serverest/BaseApiTest.java).
+2. **Dados Dinâmicos**: Uso de [FakerUtils.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/dev/serverest/utils/FakerUtils.java) para gerar massas de teste sem causar colisões.
+3. **Padrão DRY (Don't Repeat Yourself)**: Reutilização de especificações na classe base [BaseApiTest.java](file:///d:/github-projects/serverest_restassured_java/src/test/java/dev/serverest/BaseApiTest.java).
 4. **Payloads tipados**: Uso de `Map`/`List` ao invés de JSON manual em `String`, reduzindo erros de serialização.
 5. **Respeito aos Princípios SOLID & Clean Code**: Métodos pequenos, tipagem estrita e nomes descritivos.
 6. **Validação de contrato**: Uso de JSON Schema para garantir conformidade estrutural das respostas.

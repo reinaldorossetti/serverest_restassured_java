@@ -27,7 +27,6 @@
 
     <!-- Inclui as regras de Design -->
     <rule ref="category/java/design.xml">
-        <exclude name="UseUtilityClass" />
         <exclude name="TooManyMethods" />
     </rule>
 
