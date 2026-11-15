@@ -65,7 +65,7 @@ public class LoginFeatureTests extends BaseApiTest {
   @DisplayName("CT02 - Tentar login com credenciais inválidas")
   void loginWithInvalidCredentials() {
     final Map<String, Object> body =
-        Map.of(KEY_EMAIL, "usuario@inexistente.com", KEY_PASSWORD, "senhaerrada");
+        Map.of(KEY_EMAIL, FakerUtils.randomEmail(), KEY_PASSWORD, FakerUtils.randomPassword());
     givenWithAllure()
         .contentType(ContentType.JSON)
         .basePath(ROTA_LOGIN)

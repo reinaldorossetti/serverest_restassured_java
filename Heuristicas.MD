@@ -1,43 +1,72 @@
-# 🔍 VADER — Heurísticas para Testes de API
+# 🔍 VADER — Heurísticas para Testes de API (ServeRest)
 
-Heurísticas são guias práticos e mnemônicos que ajudam a explorar e testar APIs de forma sistemática, identificando problemas comuns com eficiência. A heurística **VADER** funciona como um checklist rápido para cobrir aspectos críticos durante os testes.
+Heurísticas são guias práticos e mnemônicos que ajudam a explorar e testar APIs de forma sistemática, identificando problemas funcionais, de segurança, de contrato e de resiliência com eficiência.
 
-## 🧭 Checklist VADER
+Neste projeto, a heurística **VADER** (**V**erbs, **A**uthentication, **D**ata, **E**rrors, **R**esponsiveness) atua como o **modelo oficial de design e cobertura de testes**, integrado diretamente à governança de IA em `.kiro/steering/` e às especificações em `.kiro/specs/`.
 
-### 1. 🔤 V — Verbs (Verbos)
+---
 
-Verifique se a API retorna valor real para o usuário, como dados úteis e precisos. Teste se as respostas agregam algo significativo, evitando retornos vazios ou irrelevantes. Por exemplo, um endpoint de busca deve retornar resultados relevantes.
+## 🧭 Os 5 Pilares do Checklist VADER
 
-### 2. 🔐 A — Authentication (Autenticação)
+### 1. 🔤 V — Verbs (Verbos HTTP & Semântica REST)
+Valide a semântica de cada verbo HTTP (`GET`, `POST`, `PUT`, `DELETE`) para o recurso:
+- Códigos de retorno adequados por operação (`200 OK`, `201 Created`).
+- **Segurança e Idempotência**: `GET` não altera estado; chamadas repetidas de `PUT` ou `DELETE` mantêm comportamento consistente; `PUT` em ID inexistente realiza *upsert* (`201 Created`) quando previsto pela regra do ServeRest.
+- **Consistência de Efeitos Colaterais**: mutações (`POST`, `PUT`, `DELETE`) refletem imediatamente nas consultas subsequentes (`GET`) e no estoque/vínculo entre recursos.
 
-Teste os mecanismos de autenticação e autorização. Valide cenários como login inválido, tokens expirados ou acessos não autorizados, garantindo que apenas usuários permitidos acessem recursos sensíveis.
+### 2. 🔐 A — Authentication & Authorization (Autenticação e Autorização)
+Teste os mecanismos de autenticação (JWT em `/login`) e controle de acesso baseado em perfil (RBAC):
+- **Matriz de Perfis**: Anônimo (sem token), Usuário Padrão (`administrador: "false"`) e Administrador (`administrador: "true"`).
+- **Validação de Token**: Token válido (`200`/`201`), token ausente, expirado ou malformado (`401 Unauthorized`), e tentativa de acesso a rota exclusiva de administrador por usuário comum (`403 Forbidden`).
 
-### 3. 🗃️ D — Data (Dados)
+### 3. 🗃️ D — Data (Dados, Limites e Contratos)
+Analise a integridade, tipagem e formato dos dados de entrada (request) e saída (response):
+- **Entrada**: Campos obrigatórios ausentes ou vazios, formatos inválidos (ex: CSV de e-mails inválidos), duplicidade de chaves únicas (e-mail, produto repetido no carrinho) e limites de negócio (estoque insuficiente).
+- **Saída & Contrato**: Presença de todos os campos obrigatórios, ausência de atributos não mapeados (`cpf`, `phone`, `error`) e validação estrita de contrato via **JSON Schema** (`matchesJsonSchemaInClasspath`).
 
-Analise a integridade e o formato dos dados. Verifique validações de entrada — como campos obrigatórios e tipos de dados — e de saída — como consistência do JSON. Inclua casos extremos (*edge cases*), como dados nulos ou excessivamente longos.
+### 4. ⚠️ E — Errors (Tratamento de Erros e Mensagens)
+Explore o tratamento de erros esperados e a resiliência da API:
+- Retornos determinísticos `400 Bad Request`, `401 Unauthorized` e `403 Forbidden` com mensagens claras e em conformidade com o domínio.
+- Prevenção de exclusão inconsistente (ex: bloquear `DELETE /usuarios/{id}` quando o usuário possui carrinho ativo, retornando `idCarrinho`).
+- Ausência de vazamento de *stack traces* ou erros internos (`500 Internal Server Error`).
 
-### 4. ⚠️ E — Errors (Erros)
+### 5. ⚡ R — Responsiveness (Capacidade de Resposta & SLA)
+Avalie o desempenho, limites de taxa (*rate limiting*) e comportamento sob estresse:
+- **Teste de Carga (NFR)**: Execução automatizada via **JMeter Java DSL** (`RateLimitLoadTests`) simulando 100 requisições/segundo durante 10 segundos para garantir **zero erros `5xx`** e monitorar respostas `429 Too Many Requests`.
+- **SLA de Resposta Funcional**: Monitoramento do tempo de resposta das requisições nas suítes funcionais (`.time(lessThan(3000L))`) e suporte à execução paralela (`@Execution(ExecutionMode.CONCURRENT)`).
 
-Explore o tratamento de erros. Teste respostas para falhas esperadas — por exemplo, `400 Bad Request` para entradas inválidas — e inesperadas — por exemplo, `500 Internal Server Error`. Verifique se as mensagens são claras e úteis para o usuário final.
+---
 
-### 5. ⚡ R — Responsiveness (Capacidade de resposta)
--> Item não utilizado diretamente nos testes, mas relevante para a análise de desempenho da API.
+## 📊 Matriz de Rastreabilidade VADER ↔ Cenários Automatizados (31 Cenários)
 
-Avalie os controles de taxa e o desempenho sob carga. Teste limites de requisições, o comportamento em picos de tráfego e a capacidade da API de lidar com sobrecargas sem apresentar latência elevada.
-
-## 📊 Cobertura da heurística VADER
-
-A tabela abaixo considera somente os itens **1 a 4** da heurística. O item 5 (Responsiveness) foi excluído desta avaliação, conforme definido acima.
-
-| Item | O que está coberto | O que falta ou está parcialmente coberto | O que precisa melhorar | Avaliação |
+| Pilar VADER | Login (`LoginFeatureTests`) | Usuários (`UsersFeatureTests`) | Carrinhos (`CartsFeatureTests`) | Carga / NFR (`RateLimitLoadTests`) |
 |---|---|---|---|---|
-| **1. V — Verbs (Verbos)** | Os principais verbos e fluxos da API são exercitados: criação, consulta, atualização e exclusão de usuários; login; criação, consulta, conclusão e cancelamento de carrinhos. As respostas validam status HTTP, mensagens, IDs, campos retornados e valores de negócio como total e quantidade do carrinho. | Nem todos os recursos têm a mesma profundidade de validação de resposta. A listagem de usuários valida estrutura, mas não cobre explicitamente paginação, ordenação, limites ou combinação de filtros. O cadastro de produtos aparece principalmente como apoio aos cenários de autenticação e carrinho. | Adicionar asserções de contrato e de regras de negócio para cada operação, incluindo paginação, ordenação, filtros sem resultado e consistência entre operações (por exemplo, estoque após concluir/cancelar compra). | **Boa, com lacunas de profundidade** |
-| **2. A — Authentication (Autenticação)** | `LoginFeatureTests` cobre credenciais válidas e inválidas, campos obrigatórios, token retornado e tentativa de acesso de usuário comum a rota exclusiva de administrador. `CartsFeatureTests` também valida criação de carrinho sem token, retornando `401`. | Não há cenários específicos para token malformado, token expirado, cabeçalho `Authorization` com esquema inválido ou token de usuário inexistente. A matriz de autorização não cobre sistematicamente todas as rotas protegidas e perfis. | Criar uma matriz por endpoint e perfil (anônimo, usuário comum e administrador), incluindo token ausente, inválido, expirado e adulterado, além de verificar que nenhuma operação protegida é executada após a falha de autorização. | **Parcialmente coberta** |
-| **3. D — Data (Dados)** | Há validação de campos obrigatórios no cadastro e login, formato de e-mail, duplicidade de e-mail, valores nulos/vazios na resposta, tipos básicos, ausência de campos inesperados e JSON Schema em `GET /usuarios/{id}`. Também existem cenários de estoque insuficiente e produto duplicado no carrinho. | Faltam testes sistemáticos para tipos incompatíveis, `null`, strings muito longas, valores negativos/zero, listas vazias e payloads com campos extras. O schema está aplicado ao usuário por ID, mas não a todas as respostas relevantes. | Ampliar a matriz de dados inválidos e limites por endpoint; validar o corpo completo das respostas, tipos e invariantes; adicionar schemas para login, usuários listados, produtos e carrinhos. | **Boa para usuários; parcial para a API completa** |
-| **4. E — Errors (Erros)** | Os testes cobrem erros esperados com `400`, `401` e `403`, incluindo usuário/carrinho não encontrado, e-mail duplicado, campos obrigatórios, estoque insuficiente, produto duplicado, ausência de token e falta de permissão. As mensagens de erro são verificadas em vários cenários. | Não há injeção ou simulação controlada de falhas inesperadas para avaliar `5xx`, timeout, resposta malformada ou indisponibilidade. Também não existe uma validação uniforme de formato das mensagens e do corpo de erro em todos os endpoints. | Padronizar asserções de erro (status, mensagem, campos e schema), incluir casos de método/rota não suportados e validar a observabilidade da falha. Registrar explicitamente os limites do que pode ser testado sem controlar o servidor. | **Boa para erros funcionais; limitada para falhas inesperadas** |
+| **1. V — Verbs** | `CT01` (`POST /login`) | `CT01`, `CT02`, `CT13` (`POST`)<br>`CT03`, `CT04`, `CT10` (`GET`)<br>`CT05`, `CT06` (`PUT`)<br>`CT07`, `CT08` (`DELETE`) | `CT01` (`POST`, `GET`, `DELETE /concluir-compra`)<br>`CT02` (`DELETE /cancelar-compra` + devolução de estoque) | `GET /usuarios` sob alta concorrência |
+| **2. A — Auth** | `CT01` (Token JWT gerado)<br>`CT02` (`401` credenciais inválidas)<br>`CT04` (`403` usuário padrão em `POST /produtos`) | `CT01` (`administrador: "false"`)<br>`CT02` (`administrador: "true"`) | `CT01`, `CT02` (Header `Authorization` válido)<br>`CT03` (`401` criar carrinho sem token) | — |
+| **3. D — Data** | `CT03` (campos vazios)<br>`CT05` (`@ParameterizedTest` CSV de e-mails inválidos) | `CT09`, `CT16` (e-mail duplicado em `POST`/`PUT`)<br>`CT11` (tipagem e não vazio)<br>`CT12` (ausência de campos extras)<br>`CT17` (`@ParameterizedTest` campos obrigatórios)<br>`CT18` (**JSON Schema** `user-by-id-schema.json`) | `CT04` (limite de 1 carrinho por usuário)<br>`CT06` (estoque insuficiente)<br>`CT07` (produto duplicado no mesmo payload) | — |
+| **4. E — Errors** | `CT02` (`401`)<br>`CT03`, `CT05` (`400` por campo)<br>`CT04` (`403` rota exclusiva admin) | `CT07`, `CT08`, `CT15` (`400` ID inexistente)<br>`CT09`, `CT16`, `CT17` (`400` validação)<br>`CT14` (`400` bloqueio de exclusão com carrinho associado) | `CT03` (`401` token ausente/inválido)<br>`CT04`, `CT06`, `CT07` (`400` regra de negócio)<br>`CT05` (`400` ID fora do padrão de 16 caracteres alfanuméricos) | Verificação de `status5xxCount == 0` e contabilização de `429` em JTL |
+| **5. R — Responsiveness** | Execução paralela (`CONCURRENT`) | Execução paralela (`CONCURRENT`) | Execução paralela (`CONCURRENT`) | `shouldSupport100RequestsPerSecondWithoutServerErrors` (100 req/s por 10s via JMeter DSL) |
 
-### Síntese
+---
 
-Os testes cobrem bem os fluxos funcionais e os erros de negócio mais importantes, mas a cobertura VADER ainda não deve ser interpretada como cobertura total da API. A prioridade de evolução é: **(1)** matriz completa de autenticação/autorização, **(2)** dados inválidos e limites, **(3)** schemas para todos os contratos e **(4)** cenários controlados de falha inesperada.
+## 📈 Avaliação Crítica e Plano de Evolução (Backlog de Qualidade)
 
-Observando e aplicando essas heurísticas, é possível realizar testes de API mais completos e eficazes, identificando problemas que poderiam passar despercebidos em abordagens menos estruturadas.
+| Item | O que está coberto | O que falta ou está parcialmente coberto | Ação Recomendada (Kiro Specs) | Avaliação |
+|---|---|---|---|---|
+| **1. V — Verbs** | CRUD completo de usuários, autenticação, criação/consulta/conclusão/cancelamento de carrinho e criação de produto. | Comportamento de *upsert* no `PUT /usuarios/{id}` (quando ID não existe deve criar com `201`), `GET /carrinhos` (listagem geral) e `GET, PUT, DELETE /produtos`. | Incluir cenários de *upsert* em `SPEC-USERS-01` e criar suíte dedicada em `SPEC-PRODUCTS-01`. | 🟢 **Boa, com evolução planejada para Produtos** |
+| **2. A — Auth** | Login válido/inválido, bloqueio `401` sem token em carrinho e bloqueio `403` para usuário não-admin em produtos. | Token malformado, token sem prefixo `Bearer`, token de usuário recém-excluído e tentativa de `DELETE /produtos/{id}` por usuário comum. | Expandir matriz RBAC em `SPEC-AUTH-01` e `SPEC-PRODUCTS-01`. | 🟡 **Parcialmente coberta (foco em expandir RBAC)** |
+| **3. D — Data** | Campos obrigatórios parametrizados (`@MethodSource` e `@CsvFileSource`), duplicidade, regras de estoque e JSON Schema em `GET /usuarios/{id}`. | Schemas JSON para `/login`, `/usuarios` (lista), `/carrinhos` e `/produtos`; limites numéricos (`preco <= 0`, `quantidade <= 0`). | Criar schemas em `src/test/resources/schemas/` para todas as rotas principais. | 🟢 **Boa para usuários; em expansão de Schemas** |
+| **4. E — Errors** | Erros `400`, `401` e `403` validados com mensagens exatas e integridade referencial (usuário com carrinho, produto sem estoque). | Validação de ID com menos/mais de 16 caracteres alfanuméricos em `/usuarios/{id}` e `/produtos/{id}`; exclusão de produto vinculado a carrinho. | Adicionar testes negativos de integridade referencial em `SPEC-PRODUCTS-01`. | 🟢 **Forte cobertura de erros funcionais** |
+| **5. R — Responsiveness** | Teste de carga JMeter DSL (`100 req/s` em `/usuarios`) com geração de `.jtl` e `analysis.log`, além de suítes funcionais paralelas. | Asserção explícita de tempo de resposta (`.time(lessThan(...))`) nos testes funcionais críticos. | Adotar validação de SLA nas rotas críticas via Rest Assured. | 🟢 **Coberta via JMeter DSL + JUnit Paralelo** |
+
+---
+
+## 🔗 Como Usar o VADER com Kiro Steering
+
+1. **Ao criar uma nova Spec (`.kiro/specs/<feature>/requirements.md`)**:
+   - Classifique cada requisito `R1..Rn` com a(s) letra(s) correspondente(s) do VADER: `[V]`, `[A]`, `[D]`, `[E]`, `[R]`.
+   - Verifique se a feature possui pelo menos 1 requisito para cada dimensão aplicável antes de iniciar a codificação.
+2. **Ao implementar testes (`src/test/java/dev/serverest/**/*.java`)**:
+   - Siga os padrões de implementação VADER documentados em [`.kiro/steering/api-rest-assured.md`](.kiro/steering/api-rest-assured.md).
+3. **Na revisão de PR / Definition of Done**:
+   - Valide a cobertura da feature contra o checklist em [`.kiro/steering/qa-global-dod.md`](.kiro/steering/qa-global-dod.md).
