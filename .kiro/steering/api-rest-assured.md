@@ -51,30 +51,35 @@ givenWithAllure()
 
 ---
 
-## 2. Estrutura de Teste (AAA Pattern)
+## 2. Estrutura de Teste (AAA Pattern) & Regra de Comentários
 
-Organize cada teste em **Arrange → Act → Assert**:
+### ❌ PROIBIDO: Comentários Inline (`//` ou `/* */`) Dentro do Código
+- **Nunca adicione comentários dentro do corpo das funções/métodos** (nem mesmo `// ARRANGE`, `// ACT`, `// ASSERT` ou comentários no fim da linha).
+- Separe os blocos **Arrange**, **Act** e **Assert** exclusivamente por uma linha em branco e código expressivo.
+
+### ✅ OBRIGATÓRIO: Apenas Javadoc (`/** ... */`) Acima da Função ou Classe
+- Toda documentação de contexto, requisito ou regra de negócio deve ficar exclusivamente no **Javadoc (`/** ... */`)** imediatamente acima da declaração da classe ou do método.
 
 ```java
+/**
+ * Valida a autenticação com credenciais válidas e retorno de token JWT.
+ */
 @Test
 @DisplayName("CT01 - Descrever o cenário")
 void describeWhatIsBeingTested() {
-    // ARRANGE: Preparar dados de entrada
     final String email = FakerUtils.randomEmail();
-    final String password = "senha123";
-    
-    // ACT: Executar a ação
+    final String password = DEFAULT_PASSWORD;
+
     final Response response = givenWithAllure()
         .contentType(ContentType.JSON)
         .basePath(ROTA_LOGIN)
-        .body(Map.of("email", email, "password", password))
+        .body(Map.of(KEY_EMAIL, email, KEY_PASSWORD, password))
     .when()
         .post();
-    
-    // ASSERT: Validar resultado esperado
+
     response.then()
         .statusCode(200)
-        .body("message", equalTo("Login realizado com sucesso"))
+        .body(KEY_MESSAGE, equalTo("Login realizado com sucesso"))
         .body("authorization", notNullValue());
 }
 ```
@@ -320,13 +325,15 @@ void testB_UpdateUser() {
 ### ✅ Extrair ID para Ações Subsequentes (Dentro do Mesmo Teste)
 
 ```java
+/**
+ * Cria um usuário e atualiza seus dados sequencialmente de forma isolada.
+ */
 @Test
 @DisplayName("CT08 - Criar e atualizar usuário no mesmo fluxo isolado")
 void createAndUpdateUser() {
     final String email = FakerUtils.randomEmail();
     final String name = FakerUtils.randomName();
-    
-    // Criar usuário e extrair ID
+
     final String userId = givenWithAllure()
         .contentType(ContentType.JSON)
         .basePath(ROTA_USUARIOS)
@@ -336,9 +343,8 @@ void createAndUpdateUser() {
     .then()
         .statusCode(201)
     .extract()
-        .path(KEY_ID);  // Extrai "_id"
-    
-    // Usar ID para atualizar (mesmo teste, sequencial e isolado)
+        .path(KEY_ID);
+
     givenWithAllure()
         .contentType(ContentType.JSON)
         .basePath(ROTA_USUARIOS + "/" + userId)
@@ -452,9 +458,10 @@ Antes de fazer commit em testes Java:
 - [ ] `mvn clean test` passa 100% localmente
 - [ ] `mvn pmd:check` sem erros críticos
 - [ ] `mvn checkstyle:check` sem violations
+- [ ] **Zero comentários inline (`//` ou `/* */`) dentro de métodos** — somente Javadoc (`/** ... */`) acima da função/classe
 - [ ] Sem `System.out.println()` ou `@Disabled` sem justificativa
 - [ ] Todos os testes herdam `BaseApiTest`
-- [ ] DisplayName e nomeclatura seguem padrão
+- [ ] DisplayName e nomenclatura seguem padrão
 - [ ] Dados dinâmicos com `FakerUtils`
 - [ ] Sem `Thread.sleep()` ou `waitForTimeout()`
 - [ ] Cada teste é independente (pode rodar em qualquer ordem)

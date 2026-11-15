@@ -72,7 +72,6 @@ public class RateLimitLoadTests {
                 () -> new IllegalStateException("Nenhum arquivo .jtl foi gerado em " + JTL_DIR));
     final List<String> lines = Files.readAllLines(latestJtl);
 
-    // JTL padrão é CSV com cabeçalho; ao menos 1 linha de resultado é esperada.
     assertTrue(lines.size() > 1, "JTL sem amostras suficientes para validação de carga.");
     final int responseCodeIndex = csvHeaderIndex(lines.get(0), "responseCode");
     assertTrue(responseCodeIndex >= 0, "Cabeçalho JTL não contém a coluna responseCode.");
@@ -99,8 +98,6 @@ public class RateLimitLoadTests {
     assertTrue(
         status5xxCount == 0,
         "Não era esperado erro de servidor (5xx) em 100 req/s. Total 5xx: " + status5xxCount);
-
-    // 429 responses are recorded for troubleshooting, but are not a failure condition.
     assertTrue(status429Count >= 0, "Contagem de 429 inválida.");
   }
 
@@ -164,7 +161,6 @@ public class RateLimitLoadTests {
   }
 
   private String[] splitCsv(final String line) {
-    // Para o formato padrão JTL CSV, split simples por vírgula atende o necessário aqui.
     return line.split(",", -1);
   }
 

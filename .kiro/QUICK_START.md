@@ -80,30 +80,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import java.util.Map;
 
+/** Testes de autenticação na rota /login. */
 public class LoginFeatureTests extends BaseApiTest {
-    
+
+    /** Valida login com credenciais válidas e geração de token JWT. */
     @Test
     @DisplayName("CT01 - Login com credenciais válidas retorna token")
     void loginWithValidCredentialsReturnsToken() {
-        // ARRANGE
         final String email = FakerUtils.randomEmail();
-        final String password = "senha123";
-        
+        final String password = DEFAULT_PASSWORD;
+
         createUser(email, password, false)
             .then()
             .statusCode(201);
-        
-        // ACT
+
         givenWithAllure()
             .contentType(ContentType.JSON)
             .basePath(ROTA_LOGIN)
-            .body(Map.of("email", email, "password", password))
+            .body(Map.of(KEY_EMAIL, email, KEY_PASSWORD, password))
         .when()
             .post()
-        // ASSERT
         .then()
             .statusCode(200)
-            .body("message", equalTo("Login realizado com sucesso"))
+            .body(KEY_MESSAGE, equalTo("Login realizado com sucesso"))
             .body("authorization", notNullValue());
     }
 }

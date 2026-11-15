@@ -35,10 +35,11 @@ Antes de um trabalho ser considerado **PRONTO**, valide todos os itens abaixo:
 
 ### 3. Qualidade do Código
 
-- [ ] Código segue padrões em `structure.md` (nomeclatura, imports, organização)
+- [ ] Código segue padrões em `structure.md` (nomenclatura, imports, organização)
 - [ ] Não há código duplicado (princípio DRY)
 - [ ] Métodos de teste descritivos com `@DisplayName` e lógica clara
-- [ ] Sem linhas de código "comentada" ou debug (`System.out.println()`)
+- [ ] **Proibido comentários dentro do código (`//` ou `/* */`)**: permitido apenas Javadoc (`/** ... */`) acima da classe ou da função
+- [ ] Sem linhas de código comentadas ou debug (`System.out.println()`)
 - [ ] Sem esperas arbitrárias (`Thread.sleep()`) ou `page.waitForTimeout()`
 
 ### 4. Análise Estática & Linting

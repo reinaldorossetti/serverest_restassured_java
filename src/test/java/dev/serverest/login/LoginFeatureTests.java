@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 @Execution(ExecutionMode.CONCURRENT)
 public class LoginFeatureTests extends BaseApiTest {
 
+  /** Creates a user to support login test scenarios. */
   private Response createUser(final String email, final String password, final boolean admin) {
     final Map<String, Object> payload =
         Map.of(
@@ -41,6 +42,7 @@ public class LoginFeatureTests extends BaseApiTest {
         .post();
   }
 
+  /** CT01 - Validates login with valid credentials and JWT token generation. */
   @Test
   @Severity(SeverityLevel.BLOCKER)
   @DisplayName("CT01 - Realizar login com credenciais válidas e validar token")
@@ -60,6 +62,7 @@ public class LoginFeatureTests extends BaseApiTest {
         .body("authorization", notNullValue());
   }
 
+  /** CT02 - Validates that invalid credentials return 401 Unauthorized without token. */
   @Test
   @Severity(SeverityLevel.CRITICAL)
   @DisplayName("CT02 - Tentar login com credenciais inválidas")
@@ -78,6 +81,7 @@ public class LoginFeatureTests extends BaseApiTest {
         .body("authorization", nullValue());
   }
 
+  /** CT03 - Validates required fields (email and password) on login payload. */
   @Test
   @Severity(SeverityLevel.CRITICAL)
   @DisplayName("CT03 - Validar campos obrigatórios no login")
@@ -114,6 +118,7 @@ public class LoginFeatureTests extends BaseApiTest {
         .body("password", notNullValue());
   }
 
+  /** CT04 - Validates JWT authentication and 403 authorization check on admin route. */
   @Test
   @Severity(SeverityLevel.CRITICAL)
   @DisplayName("CT04 - Login e uso do token para acessar recurso protegido")
@@ -136,7 +141,6 @@ public class LoginFeatureTests extends BaseApiTest {
             .response();
     final String authToken = loginResponse.path("authorization");
 
-    // Tenta acessar rota protegida de criação de produto
     final String productName = FakerUtils.randomProduct();
     final Map<String, Object> productPayload =
         Map.of(
@@ -156,6 +160,7 @@ public class LoginFeatureTests extends BaseApiTest {
         .body(KEY_MESSAGE, equalTo("Rota exclusiva para administradores"));
   }
 
+  /** CT05 - Validates invalid email formats from parameterized CSV source. */
   @ParameterizedTest(name = "CT05 - Validar formato de e-mail inválido: {0}")
   @CsvFileSource(resources = "/restassured/login/invalid-login-emails.csv", numLinesToSkip = 1)
   @Execution(ExecutionMode.CONCURRENT)

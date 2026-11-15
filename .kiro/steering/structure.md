@@ -165,7 +165,10 @@ dev.serverest                           # Raiz do projeto
 └── utils                               # Utilitários compartilhados
 ```
 
-## Estrutura de um Teste
+## Estrutura de um Teste (Zero Comentários Inline — Apenas Javadoc)
+
+- ❌ **Proibido** adicionar comentários `//` ou `/* */` dentro do corpo dos métodos (inclusive `// ARRANGE`, `// ACT`, `// ASSERT`).
+- ✅ **Obrigatório** usar apenas **Javadoc (`/** ... */`)** acima da classe ou da função.
 
 ```java
 package dev.serverest.usuarios;
@@ -178,16 +181,16 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+/** Suíte de testes de criação e manutenção de usuários. */
 public class UsersFeatureTests extends BaseApiTest {
-    
+
+    /** Valida a criação de um usuário padrão com payload válido. */
     @Test
     @DisplayName("CT01 - Criar usuário com dados válidos")
     void createUserWithValidData() {
-        // ARRANGE: Preparar dados
         final String userEmail = FakerUtils.randomEmail();
         final String userName = FakerUtils.randomName();
-        
-        // ACT: Executar ação
+
         givenWithAllure()
             .contentType(ContentType.JSON)
             .basePath(ROTA_USUARIOS)
@@ -195,7 +198,6 @@ public class UsersFeatureTests extends BaseApiTest {
         .when()
             .post()
         .then()
-            // ASSERT: Validar resultado
             .statusCode(201)
             .body(KEY_MESSAGE, equalTo("Cadastro realizado com sucesso"));
     }

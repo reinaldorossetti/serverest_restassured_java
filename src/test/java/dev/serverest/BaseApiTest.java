@@ -160,6 +160,9 @@ public abstract class BaseApiTest {
     } else {
       RestAssured.baseURI = prodUrl != null && !prodUrl.isBlank() ? prodUrl : "https://serverest.dev";
     }
+    
+    // Ignore SSL certificate verification (for testing environments)
+    RestAssured.useRelaxedHTTPSValidation();
   }
 
   private static String configuredValue(final String key, final String dotenvValue) {
